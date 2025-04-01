@@ -3,5 +3,5 @@ export default function LetterDetail() {
     <div>
       <h1>LetterDetail</h1>
     </div>
-  );
+  )
 }

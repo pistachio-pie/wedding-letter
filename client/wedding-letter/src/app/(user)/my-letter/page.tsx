@@ -3,5 +3,5 @@ export default function MyLetter() {
     <div>
       <h1>MyLetter</h1>
     </div>
-  );
+  )
 }

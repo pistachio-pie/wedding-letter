@@ -3,5 +3,5 @@ export default function LetterAsk() {
     <div>
       <h1>LetterAsk</h1>
     </div>
-  );
+  )
 }

@@ -3,5 +3,5 @@ export default function LetterManage() {
     <div>
       <h1>LetterManage</h1>
     </div>
-  );
+  )
 }

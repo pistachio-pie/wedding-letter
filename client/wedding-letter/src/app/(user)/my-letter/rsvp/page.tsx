@@ -3,5 +3,5 @@ export default function Rsvp() {
     <div>
       <h1>Rsvp</h1>
     </div>
-  );
+  )
 }
