@@ -5,6 +5,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
 
+    // 글로벌 프리픽스 설정
+    app.setGlobalPrefix('api')
+
     // 스웨거 설정
     const config = new DocumentBuilder()
         .setTitle('API 문서')
