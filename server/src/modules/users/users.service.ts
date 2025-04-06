@@ -21,4 +21,41 @@ export class UsersService {
     async create(user: User): Promise<User> {
         return this.usersRepository.save(user)
     }
+
+    async findByProviderId(
+        providerId: string,
+        provider: string,
+    ): Promise<User | undefined> {
+        return this.usersRepository.findOne({
+            where: {
+                providerId,
+                provider,
+            },
+        })
+    }
+
+    async createSocialUser(userData: {
+        name?: string
+        email?: string
+        providerId: string
+        provider: string
+    }): Promise<User> {
+        const newUser = this.usersRepository.create({
+            name: userData.name,
+            email: userData.email,
+            providerId: userData.providerId,
+            provider: userData.provider,
+        })
+
+        return this.usersRepository.save(newUser)
+    }
+
+    async updateRefreshToken(
+        userId: string,
+        refreshToken: string,
+    ): Promise<void> {
+        await this.usersRepository.update(userId, {
+            refreshToken: refreshToken,
+        })
+    }
 }
