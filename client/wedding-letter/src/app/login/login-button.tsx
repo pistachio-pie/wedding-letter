@@ -1,16 +1,14 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import axios from 'axios'
 import { Check } from 'lucide-react'
+import Link from 'next/link'
 
 export function LoginButton() {
-  const handleLogin = () => {
-    console.log('로그인')
-  }
-
   return (
-    <Button className='w-full' onClick={handleLogin}>
-      <Check /> 카카오톡 로그인
+    <Button className='w-full'>
+      <Link href='http://localhost:3000/api/auth/kakao'>카카오톡 로그인</Link>
     </Button>
   )
 }
