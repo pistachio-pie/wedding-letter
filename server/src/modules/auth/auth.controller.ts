@@ -35,7 +35,9 @@ export class AuthController {
 
         // 프론트엔드로 리다이렉션할 때 accessToken을 query parameter로 전달
         // 프론트엔드의 실제 존재하는 경로로 변경
-        return res.redirect(`http://localhost:3001?token=${accessToken}`)
+        return res.redirect(
+            `http://localhost:3001/kakao/login/success?token=${accessToken}`,
+        )
     }
 
     @Post('refresh')
