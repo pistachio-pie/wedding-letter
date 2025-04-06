@@ -1,0 +1,78 @@
+import { Controller, Get, Req, Res, UseGuards, Post } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import { AuthService } from './auth.service'
+import { Response } from 'express'
+import { ConfigService } from '@nestjs/config'
+
+@Controller('auth')
+export class AuthController {
+    constructor(
+        private authService: AuthService,
+        private configService: ConfigService,
+    ) {}
+
+    @Get('kakao')
+    @UseGuards(AuthGuard('kakao'))
+    async kakaoLogin() {
+        // 카카오 로그인 페이지로 리다이렉션됩니다.
+        // 실제 로직은 가드에서 처리됩니다.
+        return
+    }
+
+    @Get('kakao/callback')
+    @UseGuards(AuthGuard('kakao'))
+    async kakaoLoginCallback(@Req() req, @Res() res: Response) {
+        // req.user에는 KakaoStrategy의 validate 메서드에서 반환한 값이 있습니다.
+        const { accessToken, refreshToken } = req.user
+
+        // refreshToken은 httpOnly 쿠키로 설정하고
+        // (보안을 위해 JavaScript에서 접근할 수 없게 함)
+        res.cookie('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // HTTPS인 경우에만 true
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7일 (ms 단위)
+        })
+
+        // 프론트엔드로 리다이렉션할 때 accessToken을 query parameter로 전달
+        // 프론트엔드의 실제 존재하는 경로로 변경
+        return res.redirect(`http://localhost:3001?token=${accessToken}`)
+    }
+
+    @Post('refresh')
+    async refreshTokens(@Req() req, @Res() res: Response) {
+        const refreshToken = req.cookies['refresh_token']
+
+        if (!refreshToken) {
+            return res
+                .status(401)
+                .json({ message: '리프레시 토큰이 없습니다.' })
+        }
+
+        try {
+            // 토큰에서 사용자 ID 추출
+            const decoded = this.authService.verifyToken(
+                refreshToken,
+                this.configService.get('JWT_REFRESH_SECRET'),
+            )
+
+            // 새 토큰 발급
+            const tokens = await this.authService.refreshTokens(
+                decoded.sub,
+                refreshToken,
+            )
+
+            // 새 리프레시 토큰을 쿠키에 설정
+            res.cookie('refresh_token', tokens.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            })
+
+            return res.json({ accessToken: tokens.accessToken })
+        } catch (error) {
+            return res
+                .status(401)
+                .json({ message: '토큰이 유효하지 않습니다.' })
+        }
+    }
+}
