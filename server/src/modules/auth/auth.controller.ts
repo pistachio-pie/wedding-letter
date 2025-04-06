@@ -33,6 +33,14 @@ export class AuthController {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7일 (ms 단위)
         })
 
+        // 프론트엔드에서 사용할 access-token도 쿠키로 설정
+        // (프론트에서 localStorage에 저장할 수 있도록 httpOnly는 false로 설정)
+        res.cookie('access-token', accessToken, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000, // 1일 (ms 단위)
+        })
+
         // 프론트엔드로 리다이렉션할 때 accessToken을 query parameter로 전달
         // 프론트엔드의 실제 존재하는 경로로 변경
         return res.redirect(
@@ -68,6 +76,13 @@ export class AuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
+            })
+
+            // 새 액세스 토큰도 쿠키로 설정
+            res.cookie('access-token', tokens.accessToken, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 24 * 60 * 60 * 1000,
             })
 
             return res.json({ accessToken: tokens.accessToken })

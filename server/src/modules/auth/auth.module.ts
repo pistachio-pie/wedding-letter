@@ -6,6 +6,9 @@ import { AuthController } from './auth.controller'
 import { KakaoStrategy } from './kakao.strategy'
 import { UsersModule } from '../users/users.module'
 import { JwtModule } from '@nestjs/jwt'
+import { JwtStrategy } from '../token/jwt.strategy'
+import { AccessTokenStrategy } from '../token/access-token.strategy'
+import { TokenService } from '../token/token.service'
 
 @Module({
     imports: [
@@ -23,8 +26,14 @@ import { JwtModule } from '@nestjs/jwt'
             }),
         }),
     ],
-    providers: [AuthService, KakaoStrategy],
+    providers: [
+        AuthService,
+        KakaoStrategy,
+        JwtStrategy,
+        AccessTokenStrategy,
+        TokenService,
+    ],
     controllers: [AuthController],
-    exports: [AuthService],
+    exports: [AuthService, TokenService],
 })
 export class AuthModule {}
