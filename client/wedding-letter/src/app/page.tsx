@@ -1,12 +1,8 @@
 export default function Home() {
   return (
-    <div className='grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]'>
-      <main className='flex flex-col gap-[32px] row-start-2 items-center sm:items-start'>
-        <h1>Home</h1>
-      </main>
-      <footer className='row-start-3 flex gap-[24px] flex-wrap items-center justify-center'>
-        <h1>Footer</h1>
-      </footer>
+    <div className='flex items-center justify-center min-h-dvh'>
+      <h1>Home</h1>
+      <p>들어갈 것. 소개 및 샘플 페이지</p>
     </div>
   )
 }

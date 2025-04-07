@@ -1,5 +1,13 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Button } from '@/components/ui/button'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from '@/components/ui/navigation-menu'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -12,8 +20,46 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html>
-      <body>{children}</body>
+    <html lang='kr' suppressHydrationWarning>
+      <body>
+        <header className='fixed top-0 left-0 right-0 z-50 bg-gray-100 border-b-1 border-gray-300'>
+          <div className='flex justify-between items-center p-4'>
+            <div className='flex items-center'>
+              <h1 className='font-extrabold mr-4'>
+                <Link href='/'>Wedding Letter</Link>
+              </h1>
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <Link href='/letter-ask' legacyBehavior passHref>
+                      <NavigationMenuLink>청첩장 신청</NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link href='/my-letter' legacyBehavior passHref>
+                      <NavigationMenuLink>마이 페이지</NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link href='/admin' legacyBehavior passHref>
+                      <NavigationMenuLink>관리자 페이지</NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
+            <Button asChild>
+              <Link href='/login'>로그인</Link>
+            </Button>
+          </div>
+        </header>
+
+        {children}
+
+        <footer className='bg-gray-50 flex items-center justify-center p-4'>
+          <h1>Footer</h1>
+        </footer>
+      </body>
     </html>
   )
 }
