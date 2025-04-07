@@ -17,12 +17,6 @@ async function bootstrap() {
     // 글로벌 프리픽스 설정
     app.setGlobalPrefix('api')
 
-    // CORS 설정
-    app.enableCors({
-        origin: 'http://localhost:3000', // 프론트엔드 URL
-        credentials: true, // 인증 정보(쿠키) 허용
-    })
-
     // 스웨거 설정
     const config = new DocumentBuilder()
         .setTitle('API 문서')

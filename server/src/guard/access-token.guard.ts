@@ -21,6 +21,7 @@ export class AccessTokenGuard extends AuthGuard('access-token') {
     handleRequest(err, user) {
         // 에러가 있거나 사용자가 없으면 UnauthorizedException 발생
         if (err || !user) {
+            console.log('err', err)
             throw err || new UnauthorizedException('인증에 실패했습니다')
         }
         return user
