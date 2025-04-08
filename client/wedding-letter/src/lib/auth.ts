@@ -7,3 +7,9 @@ export async function setAccessToken(token: string) {
   const cookieStore = await cookies()
   cookieStore.set('accesstoken', token, { httpOnly: true, path: '/' })
 }
+
+// 쿠키에 저장된 토큰 확인
+export async function getAccessToken() {
+  const cookieStore = await cookies()
+  return cookieStore.get('access-token')?.value
+}
