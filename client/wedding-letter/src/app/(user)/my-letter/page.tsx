@@ -1,10 +1,33 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useUser } from '@/hooks/auth/useUser'
+import { useRouter } from 'next/navigation'
 
 export default function MyLetter() {
+  const router = useRouter()
+  const { user, isError, isLoading, refreshUserInfo, checkLoginStatus } = useUser()
+
+  // 1. 로딩 상태 처리
+  if (isLoading) {
+    return <div className='flex justify-center items-center min-h-dvh'>로딩 중...</div>
+  }
+
+  // 2. 에러 상태 처리
+  if (isError) {
+    return <div className='flex justify-center items-center min-h-dvh'>에러가 발생했습니다.</div>
+  }
+
+  // 3. 비로그인 상태 처리
+  if (!user) {
+    router.push('/login')
+    return null
+  }
+
   return (
     <div className='flex justify-center items-center min-h-dvh'>
       <Tabs defaultValue='edit' className='w-[500px]'>
@@ -27,6 +50,9 @@ export default function MyLetter() {
               </div>
               <div className='space-y-1'>
                 <p>수정할 정보 뭐있지</p>
+                <p>이름 : {user.name}</p>
+                <p>이메일 : {user.email}</p>
+                <p>권한 : {user.roll}</p>
               </div>
             </CardContent>
             <CardFooter>

@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+export const BASE_URL = 'http://localhost:3000'
 
 // axios 인스턴스 생성
 export const api = axios.create({
@@ -26,3 +26,6 @@ export const apiClient = {
     api.post<T>(url, data) as unknown as Promise<ApiResponse<T>>,
   // ... 기타 메서드
 }
+
+// api : axios 인스턴스 자체. 기본 axios 클라이언트. 인터셉터 적용
+// apiClient : api 인스턴스에 대한 래퍼. 타입 안정성 제공. 각 메서드에 대한 명시적인 타입 캐스팅을 적용하여 타입 문제 해결.

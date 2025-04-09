@@ -2,6 +2,7 @@
 // 프론트에서 토큰 저장 필요없음 -> 알아서 쿠키에 저장됨
 // access-token, refresh_token 두개 저장
 
+import { removeTokens } from '@/lib/auth'
 import { User } from '@/types/api'
 import { create } from 'zustand'
 
@@ -21,6 +22,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setAuthenticated: (value: boolean) => set({ isAuthenticated: value }),
   setUser: (user) => set({ user }),
-  logout: () => set({ isAuthenticated: false, user: null }),
+  logout: () => {
+    set({ isAuthenticated: false, user: null })
+    removeTokens()
+  },
   // 필요시 서버에 로그아웃 요청
 }))

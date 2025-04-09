@@ -4,6 +4,8 @@
 export interface User {
   email: string
   name: string
+  roll?: number
+  // admin 0, 일반 1, 게스트 2
 }
 
 // axios 통신 응답 타입
