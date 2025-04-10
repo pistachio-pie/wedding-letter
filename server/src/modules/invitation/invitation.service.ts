@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
 import { Invitation } from './entities/invitation.entity'
@@ -26,7 +26,17 @@ export class InvitationService {
     }
 
     async findOne(id: number): Promise<InvitationResponseDto> {
-        return this.invitationRepository.findOne({ where: { id } })
+        const invitation = await this.invitationRepository.findOne({
+            where: { id },
+        })
+
+        if (!invitation) {
+            throw new NotFoundException(
+                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
+            )
+        }
+
+        return invitation
     }
 
     async findByUserId(userId: number): Promise<InvitationResponseDto[]> {
@@ -45,11 +55,31 @@ export class InvitationService {
         id: number,
         updateInvitationDto: UpdateInvitationDto,
     ): Promise<InvitationResponseDto> {
+        const invitation = await this.invitationRepository.findOne({
+            where: { id },
+        })
+
+        if (!invitation) {
+            throw new NotFoundException(
+                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
+            )
+        }
+
         await this.invitationRepository.update(id, updateInvitationDto)
         return this.invitationRepository.findOne({ where: { id } })
     }
 
     async remove(id: number): Promise<void> {
+        const invitation = await this.invitationRepository.findOne({
+            where: { id },
+        })
+
+        if (!invitation) {
+            throw new NotFoundException(
+                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
+            )
+        }
+
         await this.invitationRepository.delete(id)
     }
 
@@ -128,6 +158,17 @@ export class InvitationService {
         await queryRunner.startTransaction()
 
         try {
+            // 초대장 존재 여부 확인
+            const invitation = await queryRunner.manager.findOne(Invitation, {
+                where: { id },
+            })
+
+            if (!invitation) {
+                throw new NotFoundException(
+                    `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
+                )
+            }
+
             // 1. 초대장 업데이트
             if (updateInvitationCompleteDto.invitation) {
                 await queryRunner.manager.update(
