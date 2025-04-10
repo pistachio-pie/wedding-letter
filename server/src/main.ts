@@ -19,14 +19,25 @@ async function bootstrap() {
 
     // 스웨거 설정
     const config = new DocumentBuilder()
-        .setTitle('API 문서')
-        .setDescription('API에 대한 설명')
+        .setTitle('웨딩 초대장 API')
+        .setDescription('웨딩 초대장 서비스를 위한 API 문서')
         .setVersion('1.0')
-        .addTag('API')
+        .addTag('wedding')
+        .addBearerAuth(
+            {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+                name: 'JWT',
+                description: 'JWT 토큰 입력',
+                in: 'header',
+            },
+            'access-token',
+        )
         .build()
 
     const document = SwaggerModule.createDocument(app, config)
-    SwaggerModule.setup('api', app, document)
+    SwaggerModule.setup('api/docs', app, document)
 
     await app.listen(3000)
 }

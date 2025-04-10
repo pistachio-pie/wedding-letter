@@ -1,12 +1,4 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Post,
-    UseGuards,
-    Req,
-} from '@nestjs/common'
+import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { User } from './entity/users.entity'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
@@ -40,13 +32,9 @@ export class UsersController {
 
     @Get(':id')
     @UseGuards(AccessTokenGuard)
+    @ApiOperation({ summary: '특정 사용자 조회' })
+    @ApiResponse({ status: 200, description: '사용자 정보 반환', type: User })
     findOne(@Param('id') id: string): Promise<User | undefined> {
         return this.usersService.findOne(id)
-    }
-
-    @Post()
-    @UseGuards(AccessTokenGuard)
-    create(@Body() user: User): Promise<User> {
-        return this.usersService.create(user)
     }
 }
