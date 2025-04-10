@@ -8,6 +8,8 @@ import { InvitationResponseDto } from './dto/invitation-response.dto'
 import { CreateInvitationCompleteDto } from './dto/create-invitation-complete.dto'
 import { AccountService } from '../account/account.service'
 import { GalleryService } from '../gallery/gallery.service'
+import { UpdateInvitationCompleteDto } from './dto/update-invitation-complete.dto'
+import { InvitationResponseCompleteDto } from './dto/invitation-response-complete.dto'
 
 @Injectable()
 export class InvitationService {
@@ -96,6 +98,88 @@ export class InvitationService {
                     createInvitationCompleteDto.galleryImages.map((image) => {
                         // 초대장 ID 설정
                         image.invitationId = savedInvitation.id
+                        return this.galleryService.create(image)
+                    })
+
+                results.galleryImages = await Promise.all(galleryPromises)
+            }
+
+            // 트랜잭션 커밋
+            await queryRunner.commitTransaction()
+
+            return results
+        } catch (error) {
+            // 오류 발생 시 롤백
+            await queryRunner.rollbackTransaction()
+            throw error
+        } finally {
+            // 쿼리 러너 해제
+            await queryRunner.release()
+        }
+    }
+
+    async updateComplete(
+        id: number,
+        updateInvitationCompleteDto: UpdateInvitationCompleteDto,
+    ): Promise<InvitationResponseCompleteDto> {
+        // 트랜잭션 시작
+        const queryRunner = this.dataSource.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction()
+
+        try {
+            // 1. 초대장 업데이트
+            if (updateInvitationCompleteDto.invitation) {
+                await queryRunner.manager.update(
+                    Invitation,
+                    id,
+                    updateInvitationCompleteDto.invitation,
+                )
+            }
+
+            const updatedInvitation = await queryRunner.manager.findOne(
+                Invitation,
+                { where: { id } },
+            )
+
+            const results = {
+                invitation: updatedInvitation,
+                accounts: [],
+                galleryImages: [],
+            }
+
+            // 2. 계좌 정보 업데이트 (존재하는 경우)
+            if (
+                updateInvitationCompleteDto.accounts &&
+                updateInvitationCompleteDto.accounts.length > 0
+            ) {
+                // 기존 계좌 삭제
+                await this.accountService.removeByInvitationId(id)
+
+                // 새 계좌 추가
+                const accountPromises =
+                    updateInvitationCompleteDto.accounts.map((account) => {
+                        // 초대장 ID 설정
+                        account.invitationId = id
+                        return this.accountService.create(account)
+                    })
+
+                results.accounts = await Promise.all(accountPromises)
+            }
+
+            // 3. 갤러리 이미지 업데이트 (존재하는 경우)
+            if (
+                updateInvitationCompleteDto.galleryImages &&
+                updateInvitationCompleteDto.galleryImages.length > 0
+            ) {
+                // 기존 이미지 삭제
+                await this.galleryService.removeByInvitationId(id)
+
+                // 새 이미지 추가
+                const galleryPromises =
+                    updateInvitationCompleteDto.galleryImages.map((image) => {
+                        // 초대장 ID 설정
+                        image.invitationId = id
                         return this.galleryService.create(image)
                     })
 

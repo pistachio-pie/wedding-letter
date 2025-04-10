@@ -22,6 +22,7 @@ import { InvitationResponseDto } from './dto/invitation-response.dto'
 import { GetInvitationDto } from './dto/get-invitation.dto'
 import { CreateInvitationCompleteDto } from './dto/create-invitation-complete.dto'
 import { InvitationResponseCompleteDto } from './dto/invitation-response-complete.dto'
+import { UpdateInvitationCompleteDto } from './dto/update-invitation-complete.dto'
 
 @ApiTags('invitation')
 @Controller('invitation')
@@ -122,6 +123,26 @@ export class InvitationController {
         @Body() updateInvitationDto: UpdateInvitationDto,
     ): Promise<InvitationResponseDto> {
         return this.invitationService.update(+id, updateInvitationDto)
+    }
+
+    @Put('complete/:id')
+    @ApiOperation({
+        summary: '초대장 통합 업데이트 (계좌정보, 갤러리 이미지 포함)',
+    })
+    @ApiParam({ name: 'id', description: '초대장 ID' })
+    @ApiResponse({
+        status: 200,
+        description: '초대장 및 관련 정보 업데이트 완료',
+        type: InvitationResponseCompleteDto,
+    })
+    updateComplete(
+        @Param('id') id: string,
+        @Body() updateInvitationCompleteDto: UpdateInvitationCompleteDto,
+    ): Promise<InvitationResponseCompleteDto> {
+        return this.invitationService.updateComplete(
+            +id,
+            updateInvitationCompleteDto,
+        )
     }
 
     @Delete(':id')

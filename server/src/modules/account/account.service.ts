@@ -35,4 +35,8 @@ export class AccountService {
     async remove(id: number): Promise<void> {
         await this.accountRepository.delete(id)
     }
+
+    async removeByInvitationId(invitationId: number): Promise<void> {
+        await this.accountRepository.delete({ invitationId })
+    }
 }

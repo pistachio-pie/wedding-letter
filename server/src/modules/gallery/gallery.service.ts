@@ -35,4 +35,8 @@ export class GalleryService {
     async remove(id: number): Promise<void> {
         await this.galleryRepository.delete(id)
     }
+
+    async removeByInvitationId(invitationId: number): Promise<void> {
+        await this.galleryRepository.delete({ invitationId })
+    }
 }
