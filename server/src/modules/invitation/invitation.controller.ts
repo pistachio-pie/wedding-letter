@@ -20,6 +20,8 @@ import { CreateInvitationDto } from './dto/create-invitation.dto'
 import { UpdateInvitationDto } from './dto/update-invitation.dto'
 import { InvitationResponseDto } from './dto/invitation-response.dto'
 import { GetInvitationDto } from './dto/get-invitation.dto'
+import { CreateInvitationCompleteDto } from './dto/create-invitation-complete.dto'
+import { InvitationResponseCompleteDto } from './dto/invitation-response-complete.dto'
 
 @ApiTags('invitation')
 @Controller('invitation')
@@ -88,6 +90,23 @@ export class InvitationController {
         @Body() createInvitationDto: CreateInvitationDto,
     ): Promise<InvitationResponseDto> {
         return this.invitationService.create(createInvitationDto)
+    }
+
+    @Post('complete')
+    @ApiOperation({
+        summary: '초대장 통합 생성 (계좌정보, 갤러리 이미지 포함)',
+    })
+    @ApiResponse({
+        status: 201,
+        description: '초대장 및 관련 정보 생성 완료',
+        type: InvitationResponseCompleteDto,
+    })
+    createComplete(
+        @Body() createInvitationCompleteDto: CreateInvitationCompleteDto,
+    ): Promise<InvitationResponseCompleteDto> {
+        return this.invitationService.createComplete(
+            createInvitationCompleteDto,
+        )
     }
 
     @Put(':id')
