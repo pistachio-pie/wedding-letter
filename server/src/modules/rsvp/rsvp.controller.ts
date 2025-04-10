@@ -1,9 +1,24 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger'
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Param,
+    Put,
+    Delete,
+    Query,
+} from '@nestjs/common'
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiParam,
+    ApiQuery,
+} from '@nestjs/swagger'
 import { RsvpService } from './rsvp.service'
-import { Rsvp } from './entities/rsvp.entity'
 import { CreateRsvpDto } from './dto/create-rsvp.dto'
 import { UpdateRsvpDto } from './dto/update-rsvp.dto'
+import { RsvpResponseDto } from './dto/rsvp-response.dto'
 
 @ApiTags('rsvp')
 @Controller('rsvp')
@@ -12,12 +27,23 @@ export class RsvpController {
 
     @Get()
     @ApiOperation({ summary: '모든 RSVP 조회' })
+    @ApiQuery({
+        name: 'invitationId',
+        description: '초대장 ID로 필터링(선택사항)',
+        required: false,
+        type: Number,
+    })
     @ApiResponse({
         status: 200,
         description: 'RSVP 목록 반환',
-        type: [Rsvp],
+        type: [RsvpResponseDto],
     })
-    findAll(): Promise<Rsvp[]> {
+    async findAll(
+        @Query('invitationId') invitationId?: string,
+    ): Promise<RsvpResponseDto[]> {
+        if (invitationId) {
+            return this.rsvpService.findByInvitationId(+invitationId)
+        }
         return this.rsvpService.findAll()
     }
 
@@ -27,9 +53,9 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: 'RSVP 정보 반환',
-        type: Rsvp,
+        type: RsvpResponseDto,
     })
-    findOne(@Param('id') id: string): Promise<Rsvp> {
+    findOne(@Param('id') id: string): Promise<RsvpResponseDto> {
         return this.rsvpService.findOne(+id)
     }
 
@@ -39,11 +65,11 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: '초대장별 RSVP 목록 반환',
-        type: [Rsvp],
+        type: [RsvpResponseDto],
     })
     findByInvitationId(
         @Param('invitationId') invitationId: string,
-    ): Promise<Rsvp[]> {
+    ): Promise<RsvpResponseDto[]> {
         return this.rsvpService.findByInvitationId(+invitationId)
     }
 
@@ -52,9 +78,9 @@ export class RsvpController {
     @ApiResponse({
         status: 201,
         description: 'RSVP 생성 완료',
-        type: Rsvp,
+        type: RsvpResponseDto,
     })
-    create(@Body() createRsvpDto: CreateRsvpDto): Promise<Rsvp> {
+    create(@Body() createRsvpDto: CreateRsvpDto): Promise<RsvpResponseDto> {
         return this.rsvpService.create(createRsvpDto)
     }
 
@@ -64,12 +90,12 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: 'RSVP 업데이트 완료',
-        type: Rsvp,
+        type: RsvpResponseDto,
     })
     update(
         @Param('id') id: string,
         @Body() updateRsvpDto: UpdateRsvpDto,
-    ): Promise<Rsvp> {
+    ): Promise<RsvpResponseDto> {
         return this.rsvpService.update(+id, updateRsvpDto)
     }
 

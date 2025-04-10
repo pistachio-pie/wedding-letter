@@ -8,6 +8,7 @@ import {
     Delete,
     HttpException,
     HttpStatus,
+    Query,
 } from '@nestjs/common'
 import {
     ApiTags,
@@ -15,11 +16,12 @@ import {
     ApiResponse,
     ApiParam,
     ApiBody,
+    ApiQuery,
 } from '@nestjs/swagger'
 import { CommentService } from './comment.service'
-import { Comment } from './entities/comment.entity'
 import { CreateCommentDto } from './dto/create-comment.dto'
 import { UpdateCommentDto } from './dto/update-comment.dto'
+import { CommentResponseDto } from './dto/comment-response.dto'
 
 @ApiTags('comment')
 @Controller('comment')
@@ -28,12 +30,23 @@ export class CommentController {
 
     @Get()
     @ApiOperation({ summary: '모든 댓글 조회' })
+    @ApiQuery({
+        name: 'invitationId',
+        description: '초대장 ID로 필터링(선택사항)',
+        required: false,
+        type: Number,
+    })
     @ApiResponse({
         status: 200,
         description: '댓글 목록 반환',
-        type: [Comment],
+        type: [CommentResponseDto],
     })
-    findAll(): Promise<Comment[]> {
+    async findAll(
+        @Query('invitationId') invitationId?: string,
+    ): Promise<CommentResponseDto[]> {
+        if (invitationId) {
+            return this.commentService.findByInvitationId(+invitationId)
+        }
         return this.commentService.findAll()
     }
 
@@ -43,9 +56,9 @@ export class CommentController {
     @ApiResponse({
         status: 200,
         description: '댓글 정보 반환',
-        type: Comment,
+        type: CommentResponseDto,
     })
-    findOne(@Param('id') id: string): Promise<Comment> {
+    findOne(@Param('id') id: string): Promise<CommentResponseDto> {
         return this.commentService.findOne(+id)
     }
 
@@ -55,11 +68,11 @@ export class CommentController {
     @ApiResponse({
         status: 200,
         description: '초대장별 댓글 목록 반환',
-        type: [Comment],
+        type: [CommentResponseDto],
     })
     findByInvitationId(
         @Param('invitationId') invitationId: string,
-    ): Promise<Comment[]> {
+    ): Promise<CommentResponseDto[]> {
         return this.commentService.findByInvitationId(+invitationId)
     }
 
@@ -69,9 +82,11 @@ export class CommentController {
     @ApiResponse({
         status: 201,
         description: '댓글 생성 완료',
-        type: Comment,
+        type: CommentResponseDto,
     })
-    create(@Body() createCommentDto: CreateCommentDto): Promise<Comment> {
+    create(
+        @Body() createCommentDto: CreateCommentDto,
+    ): Promise<CommentResponseDto> {
         return this.commentService.create(createCommentDto)
     }
 
@@ -82,12 +97,12 @@ export class CommentController {
     @ApiResponse({
         status: 200,
         description: '댓글 업데이트 완료',
-        type: Comment,
+        type: CommentResponseDto,
     })
     update(
         @Param('id') id: string,
         @Body() updateCommentDto: UpdateCommentDto,
-    ): Promise<Comment> {
+    ): Promise<CommentResponseDto> {
         return this.commentService.update(+id, updateCommentDto)
     }
 

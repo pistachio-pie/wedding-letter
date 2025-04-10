@@ -1,9 +1,25 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common'
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Param,
+    Put,
+    Delete,
+    Query,
+} from '@nestjs/common'
 import { InvitationService } from './invitation.service'
-import { Invitation } from './entities/invitation.entity'
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger'
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiParam,
+    ApiQuery,
+} from '@nestjs/swagger'
 import { CreateInvitationDto } from './dto/create-invitation.dto'
 import { UpdateInvitationDto } from './dto/update-invitation.dto'
+import { InvitationResponseDto } from './dto/invitation-response.dto'
+import { GetInvitationDto } from './dto/get-invitation.dto'
 
 @ApiTags('invitation')
 @Controller('invitation')
@@ -12,13 +28,27 @@ export class InvitationController {
 
     @Get()
     @ApiOperation({ summary: '모든 초대장 조회' })
+    @ApiQuery({
+        name: 'userId',
+        description: '사용자 ID로 필터링(선택사항)',
+        required: false,
+        type: Number,
+    })
     @ApiResponse({
         status: 200,
         description: '초대장 목록 반환',
-        type: [Invitation],
+        type: [InvitationResponseDto],
     })
-    findAll(): Promise<Invitation[]> {
-        return this.invitationService.findAll()
+    async findAll(
+        @Query() query?: GetInvitationDto,
+    ): Promise<InvitationResponseDto[]> {
+        const invitations = await this.invitationService.findAll()
+        if (query?.userId) {
+            return invitations.filter(
+                (invitation) => invitation.userId === +query.userId,
+            )
+        }
+        return invitations
     }
 
     @Get(':id')
@@ -27,9 +57,9 @@ export class InvitationController {
     @ApiResponse({
         status: 200,
         description: '초대장 정보 반환',
-        type: Invitation,
+        type: InvitationResponseDto,
     })
-    findOne(@Param('id') id: string): Promise<Invitation> {
+    findOne(@Param('id') id: string): Promise<InvitationResponseDto> {
         return this.invitationService.findOne(+id)
     }
 
@@ -39,9 +69,11 @@ export class InvitationController {
     @ApiResponse({
         status: 200,
         description: '사용자별 초대장 목록 반환',
-        type: [Invitation],
+        type: [InvitationResponseDto],
     })
-    findByUserId(@Param('userId') userId: string): Promise<Invitation[]> {
+    findByUserId(
+        @Param('userId') userId: string,
+    ): Promise<InvitationResponseDto[]> {
         return this.invitationService.findByUserId(+userId)
     }
 
@@ -50,11 +82,11 @@ export class InvitationController {
     @ApiResponse({
         status: 201,
         description: '초대장 생성 완료',
-        type: Invitation,
+        type: InvitationResponseDto,
     })
     create(
         @Body() createInvitationDto: CreateInvitationDto,
-    ): Promise<Invitation> {
+    ): Promise<InvitationResponseDto> {
         return this.invitationService.create(createInvitationDto)
     }
 
@@ -64,12 +96,12 @@ export class InvitationController {
     @ApiResponse({
         status: 200,
         description: '초대장 업데이트 완료',
-        type: Invitation,
+        type: InvitationResponseDto,
     })
     update(
         @Param('id') id: string,
         @Body() updateInvitationDto: UpdateInvitationDto,
-    ): Promise<Invitation> {
+    ): Promise<InvitationResponseDto> {
         return this.invitationService.update(+id, updateInvitationDto)
     }
 
