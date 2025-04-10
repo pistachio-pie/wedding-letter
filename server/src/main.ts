@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as cookieParser from 'cookie-parser'
+import { ValidationPipe } from '@nestjs/common'
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
@@ -16,6 +17,18 @@ async function bootstrap() {
 
     // 글로벌 프리픽스 설정
     app.setGlobalPrefix('api')
+
+    // 글로벌 유효성 검사 파이프 설정
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true, // DTO에 정의되지 않은 속성은 자동으로 제거
+            transform: true, // 요청 데이터를 DTO 클래스의 인스턴스로 변환
+            forbidNonWhitelisted: true, // DTO에 정의되지 않은 속성이 있으면 요청 자체를 거부
+            transformOptions: {
+                enableImplicitConversion: true, // 암시적 타입 변환 활성화
+            },
+        }),
+    )
 
     // 스웨거 설정
     const config = new DocumentBuilder()

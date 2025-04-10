@@ -36,18 +36,101 @@ export class CommentController {
         required: false,
         type: Number,
     })
+    @ApiQuery({
+        name: 'page',
+        description: '페이지 번호',
+        required: false,
+        type: Number,
+    })
+    @ApiQuery({
+        name: 'limit',
+        description: '페이지당 항목 수',
+        required: false,
+        type: Number,
+    })
     @ApiResponse({
         status: 200,
         description: '댓글 목록 반환',
-        type: [CommentResponseDto],
+        schema: {
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        $ref: '#/components/schemas/CommentResponseDto',
+                    },
+                },
+                total: { type: 'number' },
+                page: { type: 'number' },
+                lastPage: { type: 'number' },
+            },
+        },
     })
     async findAll(
         @Query('invitationId') invitationId?: string,
-    ): Promise<CommentResponseDto[]> {
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+    ) {
+        const pageNumber = page ? parseInt(page) : 1
+        const limitNumber = limit ? parseInt(limit) : 10
+
         if (invitationId) {
-            return this.commentService.findByInvitationId(+invitationId)
+            return this.commentService.findByInvitationId(
+                +invitationId,
+                pageNumber,
+                limitNumber,
+            )
         }
-        return this.commentService.findAll()
+        return this.commentService.findAll(pageNumber, limitNumber)
+    }
+
+    @Get('invitation/:invitationId')
+    @ApiOperation({ summary: '초대장별 댓글 조회' })
+    @ApiParam({ name: 'invitationId', description: '초대장 ID' })
+    @ApiQuery({
+        name: 'page',
+        description: '페이지 번호',
+        required: false,
+        type: Number,
+    })
+    @ApiQuery({
+        name: 'limit',
+        description: '페이지당 항목 수',
+        required: false,
+        type: Number,
+    })
+    @ApiResponse({
+        status: 200,
+        description: '초대장별 댓글 목록 반환',
+        schema: {
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        $ref: '#/components/schemas/CommentResponseDto',
+                    },
+                },
+                total: { type: 'number' },
+                page: { type: 'number' },
+                lastPage: { type: 'number' },
+            },
+        },
+    })
+    findByInvitationId(
+        @Param('invitationId') invitationId: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+    ) {
+        const pageNumber = page ? parseInt(page) : 1
+        const limitNumber = limit ? parseInt(limit) : 10
+        return this.commentService.findByInvitationId(
+            +invitationId,
+            pageNumber,
+            limitNumber,
+        )
     }
 
     @Get(':id')
@@ -60,20 +143,6 @@ export class CommentController {
     })
     findOne(@Param('id') id: string): Promise<CommentResponseDto> {
         return this.commentService.findOne(+id)
-    }
-
-    @Get('invitation/:invitationId')
-    @ApiOperation({ summary: '초대장별 댓글 조회' })
-    @ApiParam({ name: 'invitationId', description: '초대장 ID' })
-    @ApiResponse({
-        status: 200,
-        description: '초대장별 댓글 목록 반환',
-        type: [CommentResponseDto],
-    })
-    findByInvitationId(
-        @Param('invitationId') invitationId: string,
-    ): Promise<CommentResponseDto[]> {
-        return this.commentService.findByInvitationId(+invitationId)
     }
 
     @Post()
@@ -99,11 +168,18 @@ export class CommentController {
         description: '댓글 업데이트 완료',
         type: CommentResponseDto,
     })
-    update(
+    async update(
         @Param('id') id: string,
         @Body() updateCommentDto: UpdateCommentDto,
     ): Promise<CommentResponseDto> {
-        return this.commentService.update(+id, updateCommentDto)
+        const result = await this.commentService.update(+id, updateCommentDto)
+        if (!result) {
+            throw new HttpException(
+                '잘못된 비밀번호 또는 찾을 수 없는 댓글입니다.',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+        return result
     }
 
     @Delete(':id')

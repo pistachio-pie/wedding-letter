@@ -51,18 +51,6 @@ export class InvitationController {
         return invitations
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: '특정 초대장 조회' })
-    @ApiParam({ name: 'id', description: '초대장 ID' })
-    @ApiResponse({
-        status: 200,
-        description: '초대장 정보 반환',
-        type: InvitationResponseDto,
-    })
-    findOne(@Param('id') id: string): Promise<InvitationResponseDto> {
-        return this.invitationService.findOne(+id)
-    }
-
     @Get('user/:userId')
     @ApiOperation({ summary: '사용자별 초대장 조회' })
     @ApiParam({ name: 'userId', description: '사용자 ID' })
@@ -75,6 +63,18 @@ export class InvitationController {
         @Param('userId') userId: string,
     ): Promise<InvitationResponseDto[]> {
         return this.invitationService.findByUserId(+userId)
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: '특정 초대장 조회' })
+    @ApiParam({ name: 'id', description: '초대장 ID' })
+    @ApiResponse({
+        status: 200,
+        description: '초대장 정보 반환',
+        type: InvitationResponseDto,
+    })
+    findOne(@Param('id') id: string): Promise<InvitationResponseDto> {
+        return this.invitationService.findOne(+id)
     }
 
     @Post()

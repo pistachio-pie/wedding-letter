@@ -47,18 +47,6 @@ export class GalleryController {
         return this.galleryService.findAll()
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: '특정 갤러리 이미지 조회' })
-    @ApiParam({ name: 'id', description: '갤러리 이미지 ID' })
-    @ApiResponse({
-        status: 200,
-        description: '갤러리 이미지 정보 반환',
-        type: GalleryResponseDto,
-    })
-    findOne(@Param('id') id: string): Promise<GalleryResponseDto> {
-        return this.galleryService.findOne(+id)
-    }
-
     @Get('invitation/:invitationId')
     @ApiOperation({ summary: '초대장별 갤러리 이미지 조회' })
     @ApiParam({ name: 'invitationId', description: '초대장 ID' })
@@ -71,6 +59,18 @@ export class GalleryController {
         @Param('invitationId') invitationId: string,
     ): Promise<GalleryResponseDto[]> {
         return this.galleryService.findByInvitationId(+invitationId)
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: '특정 갤러리 이미지 조회' })
+    @ApiParam({ name: 'id', description: '갤러리 이미지 ID' })
+    @ApiResponse({
+        status: 200,
+        description: '갤러리 이미지 정보 반환',
+        type: GalleryResponseDto,
+    })
+    findOne(@Param('id') id: string): Promise<GalleryResponseDto> {
+        return this.galleryService.findOne(+id)
     }
 
     @Post()

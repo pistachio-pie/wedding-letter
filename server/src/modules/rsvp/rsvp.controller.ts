@@ -47,18 +47,6 @@ export class RsvpController {
         return this.rsvpService.findAll()
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: '특정 RSVP 조회' })
-    @ApiParam({ name: 'id', description: 'RSVP ID' })
-    @ApiResponse({
-        status: 200,
-        description: 'RSVP 정보 반환',
-        type: RsvpResponseDto,
-    })
-    findOne(@Param('id') id: string): Promise<RsvpResponseDto> {
-        return this.rsvpService.findOne(+id)
-    }
-
     @Get('invitation/:invitationId')
     @ApiOperation({ summary: '초대장별 RSVP 조회' })
     @ApiParam({ name: 'invitationId', description: '초대장 ID' })
@@ -71,6 +59,18 @@ export class RsvpController {
         @Param('invitationId') invitationId: string,
     ): Promise<RsvpResponseDto[]> {
         return this.rsvpService.findByInvitationId(+invitationId)
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: '특정 RSVP 조회' })
+    @ApiParam({ name: 'id', description: 'RSVP ID' })
+    @ApiResponse({
+        status: 200,
+        description: 'RSVP 정보 반환',
+        type: RsvpResponseDto,
+    })
+    findOne(@Param('id') id: string): Promise<RsvpResponseDto> {
+        return this.rsvpService.findOne(+id)
     }
 
     @Post()

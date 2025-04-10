@@ -47,18 +47,6 @@ export class AccountController {
         return this.accountService.findAll()
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: '특정 계좌 정보 조회' })
-    @ApiParam({ name: 'id', description: '계좌 정보 ID' })
-    @ApiResponse({
-        status: 200,
-        description: '계좌 정보 반환',
-        type: AccountResponseDto,
-    })
-    findOne(@Param('id') id: string): Promise<AccountResponseDto> {
-        return this.accountService.findOne(+id)
-    }
-
     @Get('invitation/:invitationId')
     @ApiOperation({ summary: '초대장별 계좌 정보 조회' })
     @ApiParam({ name: 'invitationId', description: '초대장 ID' })
@@ -71,6 +59,18 @@ export class AccountController {
         @Param('invitationId') invitationId: string,
     ): Promise<AccountResponseDto[]> {
         return this.accountService.findByInvitationId(+invitationId)
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: '특정 계좌 정보 조회' })
+    @ApiParam({ name: 'id', description: '계좌 정보 ID' })
+    @ApiResponse({
+        status: 200,
+        description: '계좌 정보 반환',
+        type: AccountResponseDto,
+    })
+    findOne(@Param('id') id: string): Promise<AccountResponseDto> {
+        return this.accountService.findOne(+id)
     }
 
     @Post()
