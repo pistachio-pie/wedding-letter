@@ -1,0 +1,35 @@
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    JoinColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+} from 'typeorm'
+import { Invitation } from '../../invitation/entities/invitation.entity'
+
+@Entity()
+export class Account {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
+    invitationId: number
+
+    @ManyToOne(() => Invitation)
+    @JoinColumn({ name: 'invitationId' })
+    invitation: Invitation
+
+    @Column({ type: 'enum', enum: ['신랑', '신부'] })
+    owner_type: string
+
+    @Column()
+    bank_name: string
+
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
+}
