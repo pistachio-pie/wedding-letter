@@ -2,14 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
 import { Invitation } from './entities/invitation.entity'
-import { CreateInvitationDto } from './dto/create-invitation.dto'
-import { UpdateInvitationDto } from './dto/update-invitation.dto'
-import { InvitationResponseDto } from './dto/invitation-response.dto'
-import { CreateInvitationCompleteDto } from './dto/create-invitation-complete.dto'
 import { AccountService } from '../account/account.service'
 import { GalleryService } from '../gallery/gallery.service'
+import { CreateInvitationCompleteDto } from './dto/create-invitation-complete.dto'
 import { UpdateInvitationCompleteDto } from './dto/update-invitation-complete.dto'
 import { InvitationResponseCompleteDto } from './dto/invitation-response-complete.dto'
+import { v4 as uuidv4 } from 'uuid'
 
 @Injectable()
 export class InvitationService {
@@ -21,11 +19,81 @@ export class InvitationService {
         private dataSource: DataSource,
     ) {}
 
-    async findAll(): Promise<InvitationResponseDto[]> {
-        return this.invitationRepository.find()
+    // URL 생성을 위한 헬퍼 메서드
+    private generateUniqueInvitationUrl(): string {
+        const uniqueId = uuidv4().slice(0, 8)
+        return `invitation/${uniqueId}`
     }
 
-    async findOne(id: number): Promise<InvitationResponseDto> {
+    async findAllComplete(
+        userId?: number,
+    ): Promise<InvitationResponseCompleteDto[]> {
+        // 모든 초대장 조회
+        let invitations = await this.invitationRepository.find()
+
+        // userId가 제공된 경우 필터링
+        if (userId) {
+            invitations = invitations.filter((inv) => inv.userId === userId)
+        }
+
+        // 각 초대장에 대해 계좌 정보와 갤러리 이미지 조회
+        const results = await Promise.all(
+            invitations.map(async (invitation) => {
+                // 계좌 정보 조회
+                const accounts = await this.accountService.findByInvitationId(
+                    invitation.id,
+                )
+
+                // 갤러리 이미지 조회
+                const galleryImages =
+                    await this.galleryService.findByInvitationId(invitation.id)
+
+                // 결과 반환
+                return {
+                    invitation,
+                    accounts,
+                    galleryImages,
+                }
+            }),
+        )
+
+        return results
+    }
+
+    async findByUserIdComplete(
+        userId: number,
+    ): Promise<InvitationResponseCompleteDto[]> {
+        // 사용자별 초대장 조회
+        const invitations = await this.invitationRepository.find({
+            where: { userId },
+        })
+
+        // 각 초대장에 대해 계좌 정보와 갤러리 이미지 조회
+        const results = await Promise.all(
+            invitations.map(async (invitation) => {
+                // 계좌 정보 조회
+                const accounts = await this.accountService.findByInvitationId(
+                    invitation.id,
+                )
+
+                // 갤러리 이미지 조회
+                const galleryImages =
+                    await this.galleryService.findByInvitationId(invitation.id)
+
+                // 결과 반환
+                return {
+                    invitation,
+                    accounts,
+                    galleryImages,
+                }
+            }),
+        )
+
+        return results
+    }
+
+    async findOneComplete(id: number): Promise<InvitationResponseCompleteDto> {
+        // 1. 초대장 조회
         const invitation = await this.invitationRepository.findOne({
             where: { id },
         })
@@ -36,66 +104,36 @@ export class InvitationService {
             )
         }
 
-        return invitation
-    }
+        // 2. 계좌 정보 조회
+        const accounts = await this.accountService.findByInvitationId(id)
 
-    async findByUserId(userId: number): Promise<InvitationResponseDto[]> {
-        return this.invitationRepository.find({ where: { userId } })
-    }
+        // 3. 갤러리 이미지 조회
+        const galleryImages = await this.galleryService.findByInvitationId(id)
 
-    async create(
-        createInvitationDto: CreateInvitationDto,
-    ): Promise<InvitationResponseDto> {
-        const newInvitation =
-            this.invitationRepository.create(createInvitationDto)
-        return this.invitationRepository.save(newInvitation)
-    }
-
-    async update(
-        id: number,
-        updateInvitationDto: UpdateInvitationDto,
-    ): Promise<InvitationResponseDto> {
-        const invitation = await this.invitationRepository.findOne({
-            where: { id },
-        })
-
-        if (!invitation) {
-            throw new NotFoundException(
-                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
-            )
+        // 4. 결과 반환
+        return {
+            invitation,
+            accounts,
+            galleryImages,
         }
-
-        await this.invitationRepository.update(id, updateInvitationDto)
-        return this.invitationRepository.findOne({ where: { id } })
-    }
-
-    async remove(id: number): Promise<void> {
-        const invitation = await this.invitationRepository.findOne({
-            where: { id },
-        })
-
-        if (!invitation) {
-            throw new NotFoundException(
-                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
-            )
-        }
-
-        await this.invitationRepository.delete(id)
     }
 
     async createComplete(
         createInvitationCompleteDto: CreateInvitationCompleteDto,
-    ) {
+    ): Promise<InvitationResponseCompleteDto> {
         // 트랜잭션 시작
         const queryRunner = this.dataSource.createQueryRunner()
         await queryRunner.connect()
         await queryRunner.startTransaction()
 
         try {
-            // 1. 초대장 생성
-            const invitation = this.invitationRepository.create(
-                createInvitationCompleteDto.invitation,
-            )
+            // 1. 초대장 생성 (URL 자동 생성)
+            const invitationData = {
+                ...createInvitationCompleteDto.invitation,
+                invitation_url: this.generateUniqueInvitationUrl(),
+            }
+
+            const invitation = this.invitationRepository.create(invitationData)
             const savedInvitation = await queryRunner.manager.save(invitation)
 
             const results = {
@@ -169,7 +207,7 @@ export class InvitationService {
                 )
             }
 
-            // 1. 초대장 업데이트
+            // 1. 초대장 업데이트 (URL은 변경하지 않음)
             if (updateInvitationCompleteDto.invitation) {
                 await queryRunner.manager.update(
                     Invitation,
@@ -239,5 +277,24 @@ export class InvitationService {
             // 쿼리 러너 해제
             await queryRunner.release()
         }
+    }
+
+    async remove(id: number): Promise<void> {
+        const invitation = await this.invitationRepository.findOne({
+            where: { id },
+        })
+
+        if (!invitation) {
+            throw new NotFoundException(
+                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
+            )
+        }
+
+        // 연결된 계좌 정보 및 갤러리 이미지도 함께 삭제
+        await this.accountService.removeByInvitationId(id)
+        await this.galleryService.removeByInvitationId(id)
+
+        // 초대장 삭제
+        await this.invitationRepository.delete(id)
     }
 }
