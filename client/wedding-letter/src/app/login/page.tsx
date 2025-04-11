@@ -1,5 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { LoginButton } from './login-button'
+import { Button } from '@/components/ui/button'
+import { Check } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Login() {
   return (
@@ -11,7 +13,12 @@ export default function Login() {
         </CardHeader>
         <CardContent>머시기 먼가 들어갈 내용이 있다면 추가</CardContent>
         <CardFooter>
-          <LoginButton />
+          <Button className='w-full'>
+            <Link href='http://localhost:3000/api/auth/kakao' className='flex items-center justify-center gap-2'>
+              <Check />
+              카카오톡 로그인
+            </Link>
+          </Button>
         </CardFooter>
       </Card>
     </div>

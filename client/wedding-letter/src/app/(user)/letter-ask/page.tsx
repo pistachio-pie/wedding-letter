@@ -1,6 +1,6 @@
 'use client'
 
-import CommonFormField from '@/components/common-form-field'
+import CommonFormField from '@/components/common/form-field'
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -54,21 +54,6 @@ export default function LetterAsk() {
           <CommonFormField name='groomName' control={form.control} description='description' />
 
           <CommonFormField name='groomName' control={form.control} description='description' />
-          <Input type='email' />
-          {/* <FormField
-            control={form.control}
-            name='groomName'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>신랑이름</FormLabel>
-                <FormControl>
-                  <Input placeholder='placeholder' {...field} />
-                </FormControl>
-                <FormDescription>설명</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
           <Button type='submit'>신청하기</Button>
         </form>
       </Form>
