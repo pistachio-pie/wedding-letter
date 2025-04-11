@@ -23,8 +23,8 @@ export default function CommonFormField<TFieldValues extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
+        <FormItem className='flex'>
+          <FormLabel className='w-28'>{label}</FormLabel>
           <FormControl>
             <Input type={type} placeholder={placeholder} {...field} />
           </FormControl>
