@@ -23,13 +23,21 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         profile: any,
         // done: any,
     ) {
+        // 디버깅을 위한 로그 추가
+        console.log('카카오 프로필 데이터:', JSON.stringify(profile, null, 2))
+        console.log(
+            '카카오 계정 데이터:',
+            JSON.stringify(profile._json?.kakao_account, null, 2),
+        )
+
         const { id, username, _json } = profile
         const { kakao_account } = _json
 
         // 이름이 없는 경우 대체 이름 생성
         let userName = kakao_account?.profile?.nickname || username
+        console.log('추출된 사용자 이름:', userName)
 
-        if (!userName || userName === '미연동계정') {
+        if (!userName || userName === '미연동 계정') {
             // 임의의 한글 이름 배열
             const randomNames = [
                 '하늘',

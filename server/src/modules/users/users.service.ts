@@ -58,4 +58,10 @@ export class UsersService {
             refreshToken: refreshToken,
         })
     }
+
+    async updateUserName(userId: string, name: string): Promise<void> {
+        await this.usersRepository.update(userId, {
+            name: name,
+        })
+    }
 }
