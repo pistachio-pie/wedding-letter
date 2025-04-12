@@ -13,9 +13,6 @@ export class AuthService {
     ) {}
 
     async validateKakaoUser(kakaoUser: any) {
-        // 디버깅용 로그 추가
-        console.log('카카오 사용자 데이터:', JSON.stringify(kakaoUser, null, 2))
-
         // 카카오 사용자 ID로 기존 사용자 찾기
         let user = await this.usersService.findByProviderId(
             kakaoUser.id.toString(),
@@ -24,7 +21,6 @@ export class AuthService {
 
         // 사용자가 없으면 새로 생성
         if (!user) {
-            console.log('새 사용자 생성:', kakaoUser.name)
             user = await this.usersService.createSocialUser({
                 name: kakaoUser.name,
                 email: kakaoUser.email,
@@ -34,12 +30,6 @@ export class AuthService {
         }
         // 사용자가 있지만 이름이 없거나 '미연동계정'인 경우 이름 업데이트
         else if (!user.name || user.name === '미연동계정') {
-            console.log(
-                '기존 사용자 이름 업데이트:',
-                user.name,
-                '->',
-                kakaoUser.name,
-            )
             await this.usersService.updateUserName(user.id, kakaoUser.name)
             user.name = kakaoUser.name
         }
