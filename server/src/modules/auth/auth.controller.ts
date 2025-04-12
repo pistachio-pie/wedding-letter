@@ -1,9 +1,22 @@
-import { Controller, Get, Req, Res, UseGuards, Post } from '@nestjs/common'
+import {
+    Controller,
+    Get,
+    Req,
+    Res,
+    UseGuards,
+    Post,
+    Body,
+    HttpStatus,
+} from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { AuthService } from './auth.service'
 import { Response } from 'express'
 import { ConfigService } from '@nestjs/config'
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { AdminRegisterDto } from './dto/admin-register.dto'
+import { AdminLoginDto } from './dto/admin-login.dto'
 
+@ApiTags('인증')
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -88,6 +101,106 @@ export class AuthController {
             return res
                 .status(401)
                 .json({ message: '토큰이 유효하지 않습니다.' })
+        }
+    }
+
+    @ApiOperation({ summary: '관리자 회원가입' })
+    @ApiResponse({
+        status: 201,
+        description: '관리자 계정 생성 성공',
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 요청 또는 이미 존재하는 이메일',
+    })
+    @Post('admin/register')
+    async registerAdmin(
+        @Body() adminData: AdminRegisterDto,
+        @Res() res: Response,
+    ) {
+        try {
+            const result = await this.authService.registerAdmin(adminData)
+
+            // 리프레시 토큰 쿠키 설정
+            res.cookie('refresh_token', result.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+            })
+
+            // 액세스 토큰 쿠키 설정
+            res.cookie('access-token', result.accessToken, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 24 * 60 * 60 * 1000, // 1일
+            })
+
+            return res.status(HttpStatus.CREATED).json({
+                success: true,
+                message: '관리자 계정이 생성되었습니다.',
+                user: {
+                    id: result.user.id,
+                    name: result.user.name,
+                    email: result.user.email,
+                    isAdmin: result.user.isAdmin,
+                },
+                accessToken: result.accessToken,
+            })
+        } catch (error) {
+            return res.status(HttpStatus.BAD_REQUEST).json({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
+
+    @ApiOperation({ summary: '관리자 로그인' })
+    @ApiResponse({
+        status: 200,
+        description: '관리자 로그인 성공',
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+    })
+    @Post('admin/login')
+    async loginAdmin(@Body() loginData: AdminLoginDto, @Res() res: Response) {
+        try {
+            const result = await this.authService.validateAdmin(
+                loginData.email,
+                loginData.password,
+            )
+
+            // 리프레시 토큰 쿠키 설정
+            res.cookie('refresh_token', result.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+            })
+
+            // 액세스 토큰 쿠키 설정
+            res.cookie('access-token', result.accessToken, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 24 * 60 * 60 * 1000, // 1일
+            })
+
+            return res.status(HttpStatus.OK).json({
+                success: true,
+                message: '로그인 성공',
+                user: {
+                    id: result.user.id,
+                    name: result.user.name,
+                    email: result.user.email,
+                    isAdmin: result.user.isAdmin,
+                },
+                accessToken: result.accessToken,
+            })
+        } catch (error) {
+            return res.status(HttpStatus.UNAUTHORIZED).json({
+                success: false,
+                message: '로그인 실패: ' + error.message,
+            })
         }
     }
 }
