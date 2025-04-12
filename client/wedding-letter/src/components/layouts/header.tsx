@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth'
 
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,12 @@ import {
 export default function Header() {
   const router = useRouter()
   const { isAuthenticated, logout } = useAuthStore()
+  // admin 페이지 여부 확인
+  const pathname = usePathname()
+  const isAdminPage = pathname?.startsWith('/admin')
+
+  // admin 페이지에서는 렌더링하지 않음
+  if (isAdminPage) return null
 
   // 로그아웃 버튼 동작
   const handleLogout = () => {

@@ -1,11 +1,11 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import CommonFormField from '@/components/common/form-field'
-import { Button } from '@/components/ui/button'
-import { Form } from '@/components/ui/form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { Form } from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
+import CommonFormField from '@/components/common/form-field'
 
 const formSchema = z.object({
   groomName: z.string().min(1, { message: '신랑 이름을 한글자 이상 입력하세요' }).max(20),
