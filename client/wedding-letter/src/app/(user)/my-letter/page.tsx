@@ -1,17 +1,47 @@
 'use client'
 
+import CommonFormField from '@/components/common/form-field'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Form } from '@/components/ui/form'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/hooks/auth/useUser'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+const formSchema = z.object({
+  name: z.string().min(1, { message: '변경할 이름을 입력하세요' }),
+})
 
 export default function MyLetter() {
   const router = useRouter()
   const { user, isError, isLoading, refreshUserInfo, checkLoginStatus } = useUser()
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: user?.name,
+    },
+  })
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log(values)
+    // 이름 변경에 대한 처리
+    // api 호출, zustand 업데이트, 페이지 렌더링
+  }
+
+  // 로딩이나 에러 상태 처리 로직 밖으로 뺄 수 있나? 확인하고 수정하기
   // 1. 로딩 상태 처리
   if (isLoading) {
     return <div className='flex justify-center items-center min-h-dvh'>로딩 중...</div>
@@ -29,58 +59,45 @@ export default function MyLetter() {
   }
 
   return (
-    <div className='flex justify-center items-center min-h-dvh'>
-      <Tabs defaultValue='edit' className='w-[500px]'>
-        <TabsList className='grid w-full grid-cols-2'>
-          <TabsTrigger value='edit'>회원정보수정</TabsTrigger>
-          <TabsTrigger value='rsvp'>참석현황</TabsTrigger>
-        </TabsList>
+    <div className='flex flex-col gap-4 items-center min-h-dvh w-full px-4'>
+      <div className='flex justify-start gap-4 w-full'>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant='outline'>회원정보수정</Button>
+          </SheetTrigger>
 
-        {/* 회원정보수정탭 */}
-        <TabsContent value='edit'>
-          <Card>
-            <CardHeader>
-              <CardTitle>회원정보수정</CardTitle>
-              <CardDescription>회원정보를 수정하세용가리</CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-2'>
-              <div className='space-y-1'>
-                <Label htmlFor='name'>이름</Label>
-                <Input id='name' defaultValue='원래 유저이름' />
-              </div>
-              <div className='space-y-1'>
-                <p>수정할 정보 뭐있지</p>
-                <p>이름 : {user.name}</p>
-                <p>이메일 : {user.email}</p>
-                <p>권한 : {user.roll}</p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>수정 완료</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>회원정보수정</SheetTitle>
+              <SheetDescription>이름을 변경할 수 있습니다.</SheetDescription>
+            </SheetHeader>
 
-        {/* 참석현황탭 */}
-        <TabsContent value='rsvp'>
-          <Card>
-            <CardHeader>
-              <CardTitle>참석현황</CardTitle>
-              <CardDescription>참석현황을 확인하세용가리</CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-2'>
-              <div className='space-y-1'>
-                여기는 어케 보여줄지 고민해봐야함
-                <br />
-                참석여부 통계
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>필요시 청첩장 수정</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <div className='grid gap-4 p-4'>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 w-full'>
+                  <CommonFormField control={form.control} name='name' label='이름' placeholder='이름' />
+                  <Button type='submit' className='w-full'>
+                    변경하기
+                  </Button>
+                </form>
+              </Form>
+            </div>
+
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button variant='outline'>취소</Button>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+
+        <Button>회원탈퇴</Button>
+      </div>
+
+      <div className='flex flex-col justify-center items-center gap-4'>
+        <h1>청첩장 현황 확인</h1>
+        <h1>RSVP 현황 어케 보여줄지 고민중</h1>
+      </div>
     </div>
   )
 }

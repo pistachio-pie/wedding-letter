@@ -20,8 +20,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <Header />
-
-          {children}
+          <div className='pt-[calc(var(--header-height)+1.5rem)]'>{children}</div>
 
           <Footer />
         </Providers>

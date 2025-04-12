@@ -27,6 +27,10 @@ const formSchema = z.object({
   invitationImage: z.string(),
 })
 
+// 폼 구분 필요
+// 단계별로 구성 예정
+// 해당 회원이 이미 신청하거나 청첩장을 만들었는지 확인 필요
+
 export default function LetterAsk() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,7 +58,7 @@ export default function LetterAsk() {
   }
 
   return (
-    <div className='min-h-dvh min-w-dvw p-30'>
+    <div className='w-full px-16'>
       <h1 className='text-2xl font-bold mb-10'>청첩장 신청</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 w-full'>

@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default function Login() {
   return (
-    <div className='flex justify-center items-center min-h-dvh'>
+    <div className='flex justify-center items-center py-16'>
       <Card className='w-96'>
         <CardHeader>
           <CardTitle>로그인 하세용</CardTitle>
