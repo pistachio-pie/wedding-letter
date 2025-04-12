@@ -10,6 +10,7 @@ import { CommentModule } from './modules/comment/comment.module'
 import { GalleryModule } from './modules/gallery/gallery.module'
 import { RsvpModule } from './modules/rsvp/rsvp.module'
 import { AccountModule } from './modules/account/account.module'
+import { S3Module } from './modules/s3/s3.module'
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { AccountModule } from './modules/account/account.module'
         GalleryModule,
         RsvpModule,
         AccountModule,
+        S3Module,
     ],
     controllers: [AppController],
     providers: [AppService],
