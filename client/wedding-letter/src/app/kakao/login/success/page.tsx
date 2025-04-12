@@ -1,20 +1,28 @@
 'use client'
 
-import { setAccessToken } from '@/lib/auth'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function Success() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+
+  // 일단 확인 안하고 페이지 이동하는 것으로 수정
 
   useEffect(() => {
-    const accessToken = searchParams.get('token')
-    if (accessToken) {
-      setAccessToken(accessToken)
-      router.push('/')
-    }
-  }, [searchParams, router])
+    router.push('/')
+  }, [router])
 
-  return <div>그래요</div>
+  // const searchParams = useSearchParams()
+
+  // 토큰 확인 후 페이지 이동
+  // kakao/login/success 이 엔드포인트에서 토큰을 확인할 필요가 있나? 바로 메인 페이지로 이동하는게 맞는거 아닐까?
+
+  // useEffect(() => {
+  //   const accessToken = searchParams.get('token')
+  //   if (accessToken) {
+  //     router.push('/')
+  //   }
+  // }, [searchParams, router])
+
+  return <div>로그인 성공</div>
 }

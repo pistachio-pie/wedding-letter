@@ -1,14 +1,5 @@
-import axios from 'axios'
+import { apiClient } from '@/api'
 
-const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-})
+export const fetcher = <T>(url: string): Promise<T> => apiClient.get<T>(url)
 
-export const fetcher = async <T>(url: string) => {
-  try {
-    const response = await axiosInstance.get<T>(url)
-    return response.data
-  } catch (error) {
-    throw error
-  }
-}
+// ?fetcher 역할에 대해 잘 모르겟음
