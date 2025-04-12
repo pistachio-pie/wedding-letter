@@ -45,6 +45,7 @@ export class UsersService {
             email: userData.email,
             providerId: userData.providerId,
             provider: userData.provider,
+            role: 'USER',
         })
 
         return this.usersRepository.save(newUser)
@@ -57,5 +58,33 @@ export class UsersService {
         await this.usersRepository.update(userId, {
             refreshToken: refreshToken,
         })
+    }
+
+    async updateUserName(userId: string, name: string): Promise<void> {
+        await this.usersRepository.update(userId, {
+            name: name,
+        })
+    }
+
+    async findByEmail(email: string): Promise<User | undefined> {
+        return this.usersRepository.findOne({
+            where: { email },
+        })
+    }
+
+    async createAdmin(userData: {
+        name: string
+        email: string
+        password: string
+    }): Promise<User> {
+        const newUser = this.usersRepository.create({
+            name: userData.name,
+            email: userData.email,
+            password: userData.password,
+            isAdmin: true,
+            role: 'ADMIN',
+        })
+
+        return this.usersRepository.save(newUser)
     }
 }

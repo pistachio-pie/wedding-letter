@@ -3,7 +3,6 @@ import {
     IsNotEmpty,
     IsString,
     IsNumber,
-    IsUrl,
     IsDateString,
     IsOptional,
 } from 'class-validator'
@@ -121,14 +120,6 @@ export class CreateInvitationDto {
     @IsString()
     @IsOptional()
     transportation_info: string
-
-    @ApiProperty({
-        description: '초대장 URL',
-        example: 'https://wedding.example.com/invitation/123',
-    })
-    @IsUrl()
-    @IsOptional()
-    invitation_url: string
 
     @ApiProperty({
         description: '초대장 메시지',

@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { User } from '../users/entity/users.entity'
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class AuthService {
@@ -28,8 +29,71 @@ export class AuthService {
                 provider: 'kakao',
             })
         }
+        // 사용자가 있지만 이름이 없거나 '미연동계정'인 경우 이름 업데이트
+        else if (!user.name || user.name === '미연동계정') {
+            await this.usersService.updateUserName(user.id, kakaoUser.name)
+            user.name = kakaoUser.name
+        }
 
         // 토큰을 생성하고 refreshToken을 DB에 저장
+        const tokens = await this.generateTokens(user)
+        await this.updateRefreshToken(user.id, tokens.refreshToken)
+
+        return {
+            user,
+            ...tokens,
+        }
+    }
+
+    async registerAdmin(adminData: {
+        name: string
+        email: string
+        password: string
+    }) {
+        // 이미 존재하는 이메일인지 확인
+        const existingUser = await this.usersService.findByEmail(
+            adminData.email,
+        )
+        if (existingUser) {
+            throw new Error('이미 등록된 이메일입니다.')
+        }
+
+        // 비밀번호 해싱
+        const hashedPassword = await bcrypt.hash(adminData.password, 10)
+
+        // 관리자 계정 생성
+        const admin = await this.usersService.createAdmin({
+            name: adminData.name,
+            email: adminData.email,
+            password: hashedPassword,
+        })
+
+        // 토큰 생성
+        const tokens = await this.generateTokens(admin)
+        await this.updateRefreshToken(admin.id, tokens.refreshToken)
+
+        return {
+            user: admin,
+            ...tokens,
+        }
+    }
+
+    async validateAdmin(email: string, password: string) {
+        // 이메일로 사용자 찾기
+        const user = await this.usersService.findByEmail(email)
+
+        // 사용자가 없거나 관리자가 아닌 경우
+        if (!user || !user.isAdmin) {
+            throw new Error('잘못된 인증 정보입니다.')
+        }
+
+        // 비밀번호 확인
+        const isPasswordValid = await bcrypt.compare(password, user.password)
+        if (!isPasswordValid) {
+            throw new Error('잘못된 인증 정보입니다.')
+        }
+
+        // 토큰 생성
         const tokens = await this.generateTokens(user)
         await this.updateRefreshToken(user.id, tokens.refreshToken)
 
