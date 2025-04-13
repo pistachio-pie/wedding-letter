@@ -16,7 +16,6 @@ import {
     ApiParam,
     ApiQuery,
 } from '@nestjs/swagger'
-import { GetInvitationDto } from './dto/get-invitation.dto'
 import { CreateInvitationCompleteDto } from './dto/create-invitation-complete.dto'
 import { InvitationResponseCompleteDto } from './dto/invitation-response-complete.dto'
 import { UpdateInvitationCompleteDto } from './dto/update-invitation-complete.dto'
@@ -34,22 +33,50 @@ export class InvitationController {
         required: false,
         type: Number,
     })
+    @ApiQuery({
+        name: 'page',
+        description: '페이지 번호',
+        required: false,
+        type: Number,
+    })
+    @ApiQuery({
+        name: 'limit',
+        description: '페이지당 항목 수',
+        required: false,
+        type: Number,
+    })
     @ApiResponse({
         status: 200,
         description: '초대장 목록 반환',
         type: [InvitationResponseCompleteDto],
     })
     async findAll(
-        @Query() query?: GetInvitationDto,
+        @Query('userId') userId?: number,
+        @Query('page') page?: number,
+        @Query('limit') limit?: number,
     ): Promise<InvitationResponseCompleteDto[]> {
         return this.invitationService.findAllComplete(
-            query?.userId ? +query.userId : null,
+            userId ? +userId : null,
+            page ? +page : 1,
+            limit ? +limit : 10,
         )
     }
 
     @Get('user/:userId')
     @ApiOperation({ summary: '사용자별 초대장 조회' })
     @ApiParam({ name: 'userId', description: '사용자 ID' })
+    @ApiQuery({
+        name: 'page',
+        description: '페이지 번호',
+        required: false,
+        type: Number,
+    })
+    @ApiQuery({
+        name: 'limit',
+        description: '페이지당 항목 수',
+        required: false,
+        type: Number,
+    })
     @ApiResponse({
         status: 200,
         description: '사용자별 초대장 목록 반환',
@@ -57,8 +84,14 @@ export class InvitationController {
     })
     findByUserId(
         @Param('userId') userId: string,
+        @Query('page') page?: number,
+        @Query('limit') limit?: number,
     ): Promise<InvitationResponseCompleteDto[]> {
-        return this.invitationService.findByUserIdComplete(+userId)
+        return this.invitationService.findByUserIdComplete(
+            +userId,
+            page ? +page : 1,
+            limit ? +limit : 10,
+        )
     }
 
     @Get(':id')
