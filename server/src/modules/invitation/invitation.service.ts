@@ -164,7 +164,7 @@ export class InvitationService {
             ) {
                 const galleryPromises =
                     createInvitationCompleteDto.galleryImages.map((image) => {
-                        // 초대장 ID 설정
+                        // 초대장 ID를 자동으로 설정 (클라이언트에서 전송하지 않아도 됨)
                         image.invitationId = savedInvitation.id
                         return this.galleryService.create(image)
                     })

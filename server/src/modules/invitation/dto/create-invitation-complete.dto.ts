@@ -32,9 +32,20 @@ export class CreateInvitationCompleteDto {
     accounts?: CreateAccountDto[]
 
     @ApiProperty({
-        description: '갤러리 이미지 목록 (선택사항)',
+        description:
+            '갤러리 이미지 목록 (선택사항, invitationId는 자동으로 설정됨)',
         type: [CreateGalleryDto],
         required: false,
+        example: [
+            {
+                image_url:
+                    'https://wedding-letter01.s3.ap-southeast-2.amazonaws.com/invitations/1234567890-wedding.jpg',
+                description: '웨딩 촬영 사진',
+                category: '본식',
+                location: '그랜드 힐튼 서울',
+                photoDate: '2023-06-10',
+            },
+        ],
     })
     @IsOptional()
     @IsArray()
