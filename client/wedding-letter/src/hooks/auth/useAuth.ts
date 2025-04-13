@@ -9,8 +9,7 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { auth } = useStore()
-  const logoutAction = useLogout()
+  const { auth, user } = useStore()
 
   // 관리자 계정 생성
   const registAdmin = async (requestData: AdminRequest) => {
@@ -62,12 +61,12 @@ export function useAuth() {
     setError(null)
 
     try {
-      logoutAction()
+      auth.logout()
       return true
     } catch (error: any) {
       setError(error.message)
       // api 오류가 발생해도 클라이언트 측에서는 로그아웃 처리
-      logoutAction()
+      auth.logout()
       return false
     } finally {
       setIsLoading(false)

@@ -11,10 +11,10 @@ export const useUserStore = () => useStore((state) => state.user)
 
 // 로그아웃 커스텀 훅
 export const useLogout = () => {
+  const logout = useStore((state) => state.auth.logout)
+  const setUser = useStore((state) => state.user.setUser)
   return () => {
-    const logout = useStore.getState().auth.logout
-    const setUser = useStore.getState().user.setUser
-
+    console.log('로그아웃 실행')
     logout()
     setUser(null)
   }

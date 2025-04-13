@@ -1,5 +1,6 @@
 'use client'
 
+import { usersApi } from '@/api/users'
 import { useStore } from '@/store'
 import { Profile } from '@/types/api'
 import { usePathname, useRouter } from 'next/navigation'
@@ -35,6 +36,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const adminPages = ['/admin/user', '/admin/letter', '/admin/letter/:id']
   const authPages = ['/my-letter', '/letter-ask']
   const guestPages = ['/login']
+
+  useEffect(() => {
+    async function checkAuthStatus() {
+      try {
+        console.log('인증 상태 확인 중')
+
+        // 이미 스토어에 인증 상태가 있는지 확인
+        if (auth.isAuthenticated) {
+          console.log('이미 인증됨 (스토어 상태)')
+          setIsLoading(false)
+          return
+        }
+
+        // 토큰 유효성 확인 및 사용자 정보 가져오기
+        try {
+          const userProfile = await usersApi.getUser()
+
+          // 유저 정보가 있으면 인증된 상태로 간주
+          if (userProfile) {
+            console.log('API에서 사용자 정보 확인됨')
+            auth.setAuthenticated(true)
+
+            // 관리자 권한 확인
+            if (userProfile.isAdmin) {
+              auth.setAdmin(true)
+            }
+
+            // 사용자 정보 저장
+            user.setUser(userProfile)
+          }
+        } catch (error) {
+          console.log('인증 확인 중 오류 또는 인증되지 않음')
+          // 오류 발생 시 비인증 상태로 처리
+          auth.setAuthenticated(false)
+          auth.setAdmin(false)
+          user.setUser(null)
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuthStatus()
+  }, [auth, user])
 
   // 접근 제어 로직
   useEffect(() => {

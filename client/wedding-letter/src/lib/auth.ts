@@ -17,9 +17,8 @@ export function getAccessToken() {
 // 쿠키에 저장된 토큰 삭제
 export function removeTokens() {
   Cookies.remove('access-token')
-  Cookies.remove('refresh_token')
-  // refresh token 삭제가 안되는 이유?
-  // 애초에 얘는 삭제를 안해도 되는지?
+  // Cookies.remove('refresh_token')
+  // refresh token 은 httpOnly 속성이므로 삭제 불가
 }
 
 // 서버용 쿠키 접근 함수

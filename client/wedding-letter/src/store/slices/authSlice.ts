@@ -24,18 +24,26 @@ export const authSlice: StateCreator<StoreState, [], [], AuthSlice> = (set) => (
     isAuthenticated: false,
     isAdmin: false,
     setAuthenticated: (value: boolean) =>
-      set((state: StoreState) => ({
-        auth: { ...state.auth, isAuthenticated: value },
-      })),
+      set((state: StoreState) => {
+        return {
+          auth: { ...state.auth, isAuthenticated: value },
+        }
+      }),
     setAdmin: (value: boolean) =>
       set((state: StoreState) => ({
         auth: { ...state.auth, isAdmin: value },
       })),
     logout: () => {
-      set((state: StoreState) => ({
-        auth: { ...state.auth, isAuthenticated: false, isAdmin: false },
-      })),
+      set((state: StoreState) => {
+        return {
+          auth: { ...state.auth, isAuthenticated: false, isAdmin: false },
+        }
+      })
+      try {
         removeTokens()
+      } catch (error) {
+        console.error('토큰 삭제 실패', error)
+      }
     },
   },
 })

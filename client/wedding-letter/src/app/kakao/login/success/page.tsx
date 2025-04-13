@@ -1,16 +1,50 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { usersApi } from '@/api/users'
+import { useUser } from '@/hooks/auth/useUser'
+import { useStore } from '@/store'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export default function Success() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // 일단 확인 안하고 페이지 이동하는 것으로 수정
+  // 스토어에서 인증 상태 관리 함수 가져오기
+  const { auth, user } = useStore()
 
   useEffect(() => {
-    router.push('/')
-  }, [router])
+    async function processLogin() {
+      try {
+        const token = searchParams.get('token')
+        console.log('token', token)
+
+        const userProfile = await usersApi.getUser()
+        console.log('userProfile', userProfile)
+
+        auth.setAuthenticated(true)
+
+        if (userProfile.isAdmin) {
+          auth.setAdmin(true)
+        }
+
+        user.setUser(userProfile)
+
+        console.log('로그인 성공')
+
+        router.push('/')
+      } catch (error) {
+        console.error('로그인 실패', error)
+        setError('로그인 실패')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    processLogin()
+  }, [searchParams, router, auth, user])
 
   // const searchParams = useSearchParams()
 

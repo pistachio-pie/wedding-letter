@@ -10,26 +10,24 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu'
-import { useLogout, useStore } from '@/store'
+import { useAuth } from '@/hooks/auth/useAuth'
 
 export default function Header() {
   const router = useRouter()
-  const { auth } = useStore()
-  // admin 페이지 여부 확인
   const pathname = usePathname()
+
+  const { isAuthenticated, logout } = useAuth()
+
+  // admin 페이지 여부 확인
   const isAdminPage = pathname?.startsWith('/admin')
 
   // admin 페이지에서는 렌더링하지 않음
   if (isAdminPage) return null
 
   // 로그아웃 버튼 동작
-  const handleLogout = () => {
-    try {
-      useLogout()
-      router.push('/')
-    } catch (error) {
-      console.error('로그아웃 실패', error)
-    }
+  const handleLogout = async () => {
+    await logout()
+    router.push('/login')
   }
 
   return (
@@ -59,7 +57,7 @@ export default function Header() {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-        {!auth.isAuthenticated ? (
+        {isAuthenticated ? (
           <Button onClick={handleLogout}>로그아웃</Button>
         ) : (
           <Button onClick={() => router.push('/login')}>로그인</Button>
