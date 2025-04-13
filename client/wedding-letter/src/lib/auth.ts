@@ -11,7 +11,7 @@ import Cookies from 'js-cookie'
 // 쿠키에 저장된 토큰 확인
 // 클라이언트용 쿠키 접근 함수
 export function getAccessToken() {
-  return Cookies.get('access-token')
+  return Cookies.get('access-token') || null
 }
 
 // 쿠키에 저장된 토큰 삭제

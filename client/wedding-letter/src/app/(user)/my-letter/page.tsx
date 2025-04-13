@@ -13,10 +13,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useUser } from '@/hooks/auth/useUser'
+import { useStore } from '@/store'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -25,13 +23,12 @@ const formSchema = z.object({
 })
 
 export default function MyLetter() {
-  const router = useRouter()
-  const { user, isError, isLoading, refreshUserInfo, checkLoginStatus } = useUser()
+  const { user } = useStore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: user?.name,
+      name: user?.user?.name,
     },
   })
 
@@ -39,23 +36,6 @@ export default function MyLetter() {
     console.log(values)
     // 이름 변경에 대한 처리
     // api 호출, zustand 업데이트, 페이지 렌더링
-  }
-
-  // 로딩이나 에러 상태 처리 로직 밖으로 뺄 수 있나? 확인하고 수정하기
-  // 1. 로딩 상태 처리
-  if (isLoading) {
-    return <div className='flex justify-center items-center min-h-dvh'>로딩 중...</div>
-  }
-
-  // 2. 에러 상태 처리
-  if (isError) {
-    return <div className='flex justify-center items-center min-h-dvh'>에러가 발생했습니다.</div>
-  }
-
-  // 3. 비로그인 상태 처리
-  if (!user) {
-    router.push('/login')
-    return null
   }
 
   return (

@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useAuthStore } from '@/store/auth'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -11,10 +10,11 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu'
+import { useLogout, useStore } from '@/store'
 
 export default function Header() {
   const router = useRouter()
-  const { isAuthenticated, logout } = useAuthStore()
+  const { auth } = useStore()
   // admin 페이지 여부 확인
   const pathname = usePathname()
   const isAdminPage = pathname?.startsWith('/admin')
@@ -25,7 +25,7 @@ export default function Header() {
   // 로그아웃 버튼 동작
   const handleLogout = () => {
     try {
-      logout()
+      useLogout()
       router.push('/')
     } catch (error) {
       console.error('로그아웃 실패', error)
@@ -59,7 +59,7 @@ export default function Header() {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-        {isAuthenticated ? (
+        {!auth.isAuthenticated ? (
           <Button onClick={handleLogout}>로그아웃</Button>
         ) : (
           <Button onClick={() => router.push('/login')}>로그인</Button>

@@ -16,15 +16,12 @@ api.interceptors.response.use(
   (error) => Promise.reject(error),
 )
 
-// 커스텀 타입 정의
-type ApiResponse<T> = T
-
 // 커스텀 메서드 정의
 export const apiClient = {
-  get: <T>(url: string): Promise<ApiResponse<T>> => api.get<T>(url) as unknown as Promise<ApiResponse<T>>,
-  post: <T>(url: string, data?: any): Promise<ApiResponse<T>> =>
-    api.post<T>(url, data) as unknown as Promise<ApiResponse<T>>,
-  // ... 기타 메서드
+  get: <T>(url: string): Promise<T> => api.get<T>(url) as unknown as Promise<T>,
+  post: <T>(url: string, data?: any): Promise<T> => api.post<T>(url, data) as unknown as Promise<T>,
+  put: <T>(url: string, data?: any): Promise<T> => api.put<T>(url, data) as unknown as Promise<T>,
+  delete: <T>(url: string): Promise<T> => api.delete<T>(url) as unknown as Promise<T>,
 }
 
 // api : axios 인스턴스 자체. 기본 axios 클라이언트. 인터셉터 적용
