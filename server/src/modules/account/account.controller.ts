@@ -14,14 +14,18 @@ import {
     ApiResponse,
     ApiParam,
     ApiQuery,
+    ApiExtraModels,
+    getSchemaPath,
 } from '@nestjs/swagger'
 import { AccountService } from './account.service'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import { AccountResponseDto } from './dto/account-response.dto'
+import { ApiResponseDto } from 'src/types/api-response.dto'
 
 @ApiTags('account')
 @Controller('account')
+@ApiExtraModels(ApiResponseDto, AccountResponseDto)
 export class AccountController {
     constructor(private readonly accountService: AccountService) {}
 
@@ -36,7 +40,19 @@ export class AccountController {
     @ApiResponse({
         status: 200,
         description: '계좌 정보 목록 반환',
-        type: [AccountResponseDto],
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'array',
+                            items: { $ref: getSchemaPath(AccountResponseDto) },
+                        },
+                    },
+                },
+            ],
+        },
     })
     async findAll(
         @Query('invitationId') invitationId?: string,
@@ -53,7 +69,19 @@ export class AccountController {
     @ApiResponse({
         status: 200,
         description: '초대장별 계좌 정보 목록 반환',
-        type: [AccountResponseDto],
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'array',
+                            items: { $ref: getSchemaPath(AccountResponseDto) },
+                        },
+                    },
+                },
+            ],
+        },
     })
     findByInvitationId(
         @Param('invitationId') invitationId: string,
@@ -67,7 +95,16 @@ export class AccountController {
     @ApiResponse({
         status: 200,
         description: '계좌 정보 반환',
-        type: AccountResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(AccountResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     findOne(@Param('id') id: string): Promise<AccountResponseDto> {
         return this.accountService.findOne(+id)
@@ -78,7 +115,16 @@ export class AccountController {
     @ApiResponse({
         status: 201,
         description: '계좌 정보 생성 완료',
-        type: AccountResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(AccountResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     create(
         @Body() createAccountDto: CreateAccountDto,
@@ -92,7 +138,16 @@ export class AccountController {
     @ApiResponse({
         status: 200,
         description: '계좌 정보 업데이트 완료',
-        type: AccountResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(AccountResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     update(
         @Param('id') id: string,
@@ -107,6 +162,20 @@ export class AccountController {
     @ApiResponse({
         status: 200,
         description: '계좌 정보 삭제 완료',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: true },
+                        message: {
+                            example: '계좌 정보가 성공적으로 삭제되었습니다.',
+                        },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
     })
     remove(@Param('id') id: string): Promise<void> {
         return this.accountService.remove(+id)

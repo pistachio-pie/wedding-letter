@@ -3,17 +3,29 @@ import { AppModule } from './app.module'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as cookieParser from 'cookie-parser'
 import { ValidationPipe } from '@nestjs/common'
+import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor'
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
 
     app.enableCors({
-        origin: 'http://localhost:3001', // 프론트엔드 URL
+        origin: true, // 모든 출처 허용
         credentials: true, // 인증 정보(쿠키) 허용
     })
 
     // 쿠키 파서 미들웨어 추가
     app.use(cookieParser())
+
+    // 요청 로깅 미들웨어 추가
+    app.use((req, res, next) => {
+        console.log('=== 요청 정보 ===')
+        console.log('요청 URL:', req.url)
+        console.log('요청 메서드:', req.method)
+        console.log('쿠키:', req.cookies)
+        console.log('헤더:', req.headers)
+        console.log('==================')
+        next()
+    })
 
     // 글로벌 프리픽스 설정
     app.setGlobalPrefix('api')
@@ -29,6 +41,9 @@ async function bootstrap() {
             },
         }),
     )
+
+    // 전역 응답 변환 인터셉터 적용
+    app.useGlobalInterceptors(new TransformResponseInterceptor())
 
     // 스웨거 설정
     const config = new DocumentBuilder()

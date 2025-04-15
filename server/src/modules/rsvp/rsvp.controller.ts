@@ -14,14 +14,18 @@ import {
     ApiResponse,
     ApiParam,
     ApiQuery,
+    ApiExtraModels,
+    getSchemaPath,
 } from '@nestjs/swagger'
 import { RsvpService } from './rsvp.service'
 import { CreateRsvpDto } from './dto/create-rsvp.dto'
 import { UpdateRsvpDto } from './dto/update-rsvp.dto'
 import { RsvpResponseDto } from './dto/rsvp-response.dto'
+import { ApiResponseDto } from 'src/types/api-response.dto'
 
 @ApiTags('rsvp')
 @Controller('rsvp')
+@ApiExtraModels(ApiResponseDto, RsvpResponseDto)
 export class RsvpController {
     constructor(private readonly rsvpService: RsvpService) {}
 
@@ -36,7 +40,19 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: 'RSVP 목록 반환',
-        type: [RsvpResponseDto],
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'array',
+                            items: { $ref: getSchemaPath(RsvpResponseDto) },
+                        },
+                    },
+                },
+            ],
+        },
     })
     async findAll(
         @Query('invitationId') invitationId?: string,
@@ -53,7 +69,19 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: '초대장별 RSVP 목록 반환',
-        type: [RsvpResponseDto],
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'array',
+                            items: { $ref: getSchemaPath(RsvpResponseDto) },
+                        },
+                    },
+                },
+            ],
+        },
     })
     findByInvitationId(
         @Param('invitationId') invitationId: string,
@@ -67,7 +95,16 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: 'RSVP 정보 반환',
-        type: RsvpResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(RsvpResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     findOne(@Param('id') id: string): Promise<RsvpResponseDto> {
         return this.rsvpService.findOne(+id)
@@ -78,7 +115,16 @@ export class RsvpController {
     @ApiResponse({
         status: 201,
         description: 'RSVP 생성 완료',
-        type: RsvpResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(RsvpResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     create(@Body() createRsvpDto: CreateRsvpDto): Promise<RsvpResponseDto> {
         return this.rsvpService.create(createRsvpDto)
@@ -90,7 +136,16 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: 'RSVP 업데이트 완료',
-        type: RsvpResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(RsvpResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     update(
         @Param('id') id: string,
@@ -105,6 +160,20 @@ export class RsvpController {
     @ApiResponse({
         status: 200,
         description: 'RSVP 삭제 완료',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: true },
+                        message: {
+                            example: 'RSVP가 성공적으로 삭제되었습니다.',
+                        },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
     })
     remove(@Param('id') id: string): Promise<void> {
         return this.rsvpService.remove(+id)

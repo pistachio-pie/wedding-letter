@@ -83,7 +83,7 @@ export class AuthService {
         const user = await this.usersService.findByEmail(email)
 
         // 사용자가 없거나 관리자가 아닌 경우
-        if (!user || !user.isAdmin) {
+        if (!user || user.role !== 'ADMIN') {
             throw new Error('잘못된 인증 정보입니다.')
         }
 
@@ -104,7 +104,11 @@ export class AuthService {
     }
 
     async generateTokens(user: User) {
-        const payload = { sub: user.id, email: user.email }
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            role: user.role,
+        }
 
         const accessToken = this.jwtService.sign(payload, {
             secret: this.configService.get<string>('JWT_ACCESS_SECRET'),

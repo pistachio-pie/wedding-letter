@@ -81,7 +81,6 @@ export class UsersService {
             name: userData.name,
             email: userData.email,
             password: userData.password,
-            isAdmin: true,
             role: 'ADMIN',
         })
 

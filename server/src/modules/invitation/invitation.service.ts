@@ -7,6 +7,7 @@ import { GalleryService } from '../gallery/gallery.service'
 import { CreateInvitationCompleteDto } from './dto/create-invitation-complete.dto'
 import { UpdateInvitationCompleteDto } from './dto/update-invitation-complete.dto'
 import { InvitationResponseCompleteDto } from './dto/invitation-response-complete.dto'
+import { InvitationListResponseDto } from './dto/invitation-list-response.dto'
 import { v4 as uuidv4 } from 'uuid'
 
 @Injectable()
@@ -25,15 +26,28 @@ export class InvitationService {
         return `invitation/${uniqueId}`
     }
 
-    async findAllComplete(
+    /**
+     * 간소화된 초대장 목록 조회 (계좌 및 갤러리 정보 제외)
+     */
+    async findAllSimplified(
         userId?: number,
         page: number = 1,
         limit: number = 10,
-    ): Promise<InvitationResponseCompleteDto[]> {
+    ): Promise<InvitationListResponseDto[]> {
         // 쿼리 조건 설정
         const queryOptions: any = {
             skip: (page - 1) * limit,
             take: limit,
+            select: [
+                'id',
+                'userId',
+                'groom_name',
+                'bride_name',
+                'wedding_date',
+                'venue_name',
+                'invitation_url',
+                'createdAt',
+            ],
         }
 
         // userId가 제공된 경우 where 조건 추가
@@ -44,68 +58,59 @@ export class InvitationService {
         // 페이징 적용된 쿼리로 초대장 조회
         const invitations = await this.invitationRepository.find(queryOptions)
 
-        // 결과 배열 초기화
-        const results: InvitationResponseCompleteDto[] = []
-
-        // 각 초대장에 대해 순차적으로 계좌 정보와 갤러리 이미지 조회
-        for (const invitation of invitations) {
-            // 계좌 정보 조회
-            const accounts = await this.accountService.findByInvitationId(
-                invitation.id,
-            )
-
-            // 갤러리 이미지 조회
-            const galleryImages = await this.galleryService.findByInvitationId(
-                invitation.id,
-            )
-
-            // 결과 추가
-            results.push({
-                invitation,
-                accounts,
-                galleryImages,
-            })
-        }
-
-        return results
+        // 엔티티를 DTO로 변환
+        return invitations.map((invitation) => {
+            const dto = new InvitationListResponseDto()
+            dto.id = invitation.id
+            dto.userId = invitation.userId
+            dto.groom_name = invitation.groom_name
+            dto.bride_name = invitation.bride_name
+            dto.wedding_date = invitation.wedding_date
+            dto.venue_name = invitation.venue_name
+            dto.invitation_url = invitation.invitation_url
+            dto.createdAt = invitation.createdAt
+            return dto
+        })
     }
 
-    async findByUserIdComplete(
+    /**
+     * 간소화된 사용자별 초대장 목록 조회 (계좌 및 갤러리 정보 제외)
+     */
+    async findByUserIdSimplified(
         userId: number,
         page: number = 1,
         limit: number = 10,
-    ): Promise<InvitationResponseCompleteDto[]> {
+    ): Promise<InvitationListResponseDto[]> {
         // 사용자별 초대장 조회 (페이징 적용)
         const invitations = await this.invitationRepository.find({
             where: { userId },
             skip: (page - 1) * limit,
             take: limit,
+            select: [
+                'id',
+                'userId',
+                'groom_name',
+                'bride_name',
+                'wedding_date',
+                'venue_name',
+                'invitation_url',
+                'createdAt',
+            ],
         })
 
-        // 결과 배열 초기화
-        const results: InvitationResponseCompleteDto[] = []
-
-        // 각 초대장에 대해 순차적으로 계좌 정보와 갤러리 이미지 조회
-        for (const invitation of invitations) {
-            // 계좌 정보 조회
-            const accounts = await this.accountService.findByInvitationId(
-                invitation.id,
-            )
-
-            // 갤러리 이미지 조회
-            const galleryImages = await this.galleryService.findByInvitationId(
-                invitation.id,
-            )
-
-            // 결과 추가
-            results.push({
-                invitation,
-                accounts,
-                galleryImages,
-            })
-        }
-
-        return results
+        // 엔티티를 DTO로 변환
+        return invitations.map((invitation) => {
+            const dto = new InvitationListResponseDto()
+            dto.id = invitation.id
+            dto.userId = invitation.userId
+            dto.groom_name = invitation.groom_name
+            dto.bride_name = invitation.bride_name
+            dto.wedding_date = invitation.wedding_date
+            dto.venue_name = invitation.venue_name
+            dto.invitation_url = invitation.invitation_url
+            dto.createdAt = invitation.createdAt
+            return dto
+        })
     }
 
     async findOneComplete(id: number): Promise<InvitationResponseCompleteDto> {

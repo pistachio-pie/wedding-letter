@@ -17,14 +17,18 @@ import {
     ApiParam,
     ApiBody,
     ApiQuery,
+    ApiExtraModels,
+    getSchemaPath,
 } from '@nestjs/swagger'
 import { CommentService } from './comment.service'
 import { CreateCommentDto } from './dto/create-comment.dto'
 import { UpdateCommentDto } from './dto/update-comment.dto'
 import { CommentResponseDto } from './dto/comment-response.dto'
+import { ApiResponseDto } from 'src/types/api-response.dto'
 
 @ApiTags('comment')
 @Controller('comment')
+@ApiExtraModels(ApiResponseDto, CommentResponseDto)
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
@@ -52,19 +56,27 @@ export class CommentController {
         status: 200,
         description: '댓글 목록 반환',
         schema: {
-            type: 'object',
-            properties: {
-                data: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        $ref: '#/components/schemas/CommentResponseDto',
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'object',
+                            properties: {
+                                data: {
+                                    type: 'array',
+                                    items: {
+                                        $ref: getSchemaPath(CommentResponseDto),
+                                    },
+                                },
+                                total: { type: 'number' },
+                                page: { type: 'number' },
+                                lastPage: { type: 'number' },
+                            },
+                        },
                     },
                 },
-                total: { type: 'number' },
-                page: { type: 'number' },
-                lastPage: { type: 'number' },
-            },
+            ],
         },
     })
     async findAll(
@@ -104,19 +116,27 @@ export class CommentController {
         status: 200,
         description: '초대장별 댓글 목록 반환',
         schema: {
-            type: 'object',
-            properties: {
-                data: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        $ref: '#/components/schemas/CommentResponseDto',
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'object',
+                            properties: {
+                                data: {
+                                    type: 'array',
+                                    items: {
+                                        $ref: getSchemaPath(CommentResponseDto),
+                                    },
+                                },
+                                total: { type: 'number' },
+                                page: { type: 'number' },
+                                lastPage: { type: 'number' },
+                            },
+                        },
                     },
                 },
-                total: { type: 'number' },
-                page: { type: 'number' },
-                lastPage: { type: 'number' },
-            },
+            ],
         },
     })
     findByInvitationId(
@@ -139,7 +159,16 @@ export class CommentController {
     @ApiResponse({
         status: 200,
         description: '댓글 정보 반환',
-        type: CommentResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(CommentResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     findOne(@Param('id') id: string): Promise<CommentResponseDto> {
         return this.commentService.findOne(+id)
@@ -151,7 +180,16 @@ export class CommentController {
     @ApiResponse({
         status: 201,
         description: '댓글 생성 완료',
-        type: CommentResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(CommentResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     create(
         @Body() createCommentDto: CreateCommentDto,
@@ -166,7 +204,35 @@ export class CommentController {
     @ApiResponse({
         status: 200,
         description: '댓글 업데이트 완료',
-        type: CommentResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(CommentResponseDto) },
+                    },
+                },
+            ],
+        },
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 비밀번호 또는 찾을 수 없는 댓글',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: false },
+                        message: {
+                            example:
+                                '잘못된 비밀번호 또는 찾을 수 없는 댓글입니다.',
+                        },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
     })
     async update(
         @Param('id') id: string,
@@ -200,10 +266,39 @@ export class CommentController {
     @ApiResponse({
         status: 200,
         description: '댓글 삭제 완료',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: true },
+                        message: {
+                            example: '댓글이 성공적으로 삭제되었습니다.',
+                        },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
     })
     @ApiResponse({
         status: 400,
         description: '잘못된 비밀번호 또는 찾을 수 없는 댓글',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: false },
+                        message: {
+                            example:
+                                '잘못된 비밀번호 또는 찾을 수 없는 댓글입니다.',
+                        },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
     })
     async remove(
         @Param('id') id: string,
