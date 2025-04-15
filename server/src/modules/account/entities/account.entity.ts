@@ -27,6 +27,12 @@ export class Account {
     @Column()
     bank_name: string
 
+    @Column()
+    account_number: string
+
+    @Column()
+    account_holder: string
+
     @CreateDateColumn()
     createdAt: Date
 

@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-    IsNotEmpty,
-    IsString,
-    IsNumber,
-    IsDateString,
-    IsOptional,
-} from 'class-validator'
+import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator'
 
 export class CreateInvitationDto {
     @ApiProperty({
@@ -81,13 +75,13 @@ export class CreateInvitationDto {
     bride_mother_name: string
 
     @ApiProperty({
-        description: '결혼식 날짜',
+        description: '결혼식 날짜 (YYYY-MM-DD 형식)',
         example: '2024-12-25',
-        type: Date,
+        type: String,
     })
-    @IsDateString()
     @IsNotEmpty()
-    wedding_date: Date
+    @IsString()
+    wedding_date: string
 
     @ApiProperty({
         description: '결혼식장 이름',
