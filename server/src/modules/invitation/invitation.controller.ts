@@ -203,7 +203,11 @@ export class InvitationController {
 
     @Post()
     @UseGuards(AccessTokenGuard)
-    @ApiOperation({ summary: '초대장 생성 (계좌정보, 갤러리 이미지 포함)' })
+    @ApiOperation({
+        summary: '초대장 생성 (계좌정보, 갤러리 이미지 포함)',
+        description:
+            '초대장을 생성합니다. userId는 토큰에서 자동으로 설정됩니다 (관리자는 다른 사용자 ID 설정 가능).',
+    })
     @ApiResponse({
         status: 201,
         description: '초대장 생성 완료',
@@ -224,16 +228,9 @@ export class InvitationController {
         @Body() createInvitationDto: CreateInvitationCompleteDto,
         @Req() req,
     ): Promise<any> {
-        // 본인의 초대장만 생성 가능하거나, 관리자는 모든 사용자의 초대장 생성 가능
-        if (
-            req.user.id !== createInvitationDto.invitation.userId &&
-            req.user.role !== 'ADMIN'
-        ) {
-            throw new HttpException(
-                '본인의 초대장만 생성할 수 있습니다.',
-                HttpStatus.FORBIDDEN,
-            )
-        }
+        // 토큰에서 가져온 사용자 ID 사용
+        // DTO에 동적으로 userId 속성 추가
+        createInvitationDto.invitation['userId'] = req.user.id
 
         const invitation =
             await this.invitationService.createComplete(createInvitationDto)
