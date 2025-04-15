@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const authCheckRef = useRef(false)
 
   // 페이지 접근 설정
-  const adminPages = ['/admin/user', '/admin/letter', '/admin/letter/:id']
+  const adminPages = ['/admin', '/admin/user', '/admin/letter', '/admin/letter/:id']
   const authPages = ['/my-letter', '/letter-ask']
   const guestPages = ['/login']
 
@@ -96,10 +96,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // 관리자 페이지 접근 제어
     if (adminPages.some((page) => pathname?.startsWith(page))) {
-      if (!auth.isAuthenticated) {
-        router.push('/admin')
-        return
-      }
       if (!auth.isAdmin) {
         router.push('/')
         return
