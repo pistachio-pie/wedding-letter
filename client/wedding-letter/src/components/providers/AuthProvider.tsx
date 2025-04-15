@@ -4,7 +4,7 @@ import { usersApi } from '@/api/users'
 import { useStore } from '@/store'
 import { Profile } from '@/types/api'
 import { usePathname, useRouter } from 'next/navigation'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 // 인증 컨텍스트 타입
 interface AuthContextType {
@@ -32,30 +32,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 로딩상태
   const [isLoading, setIsLoading] = useState(true)
 
+  const authCheckRef = useRef(false)
+
   // 페이지 접근 설정
   const adminPages = ['/admin/user', '/admin/letter', '/admin/letter/:id']
   const authPages = ['/my-letter', '/letter-ask']
   const guestPages = ['/login']
 
+  // 인증 상태 확인 (최초 1회 실행)
   useEffect(() => {
+    // 이미 확인한 경우 스킵
+    if (authCheckRef.current) {
+      setIsLoading(false)
+      return
+    }
+
     async function checkAuthStatus() {
       try {
-        console.log('인증 상태 확인 중')
+        console.log('인증 상태 확인 중(최초 1회)')
 
-        // 이미 스토어에 인증 상태가 있는지 확인
-        if (auth.isAuthenticated) {
-          console.log('이미 인증됨 (스토어 상태)')
-          setIsLoading(false)
+        // 이미 스토어에 정보가 있는 경우 확인 스킵
+        if (auth.isAuthenticated && user.user) {
           return
         }
 
-        // 토큰 유효성 확인 및 사용자 정보 가져오기
+        // 스토어에 정보가 없는 경우 사용자 정보 조회
         try {
           const userProfile = await usersApi.getUser()
 
           // 유저 정보가 있으면 인증된 상태로 간주
           if (userProfile) {
-            console.log('API에서 사용자 정보 확인됨')
             auth.setAuthenticated(true)
 
             // 관리자 권한 확인
@@ -74,17 +80,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           user.setUser(null)
         }
       } finally {
+        authCheckRef.current = true
         setIsLoading(false)
       }
     }
 
     checkAuthStatus()
-  }, [auth, user])
+  }, [])
 
-  // 접근 제어 로직
+  // 접근 제어 로직 (로딩 상태가 아닐 때만 실행)
   useEffect(() => {
-    // 앱 초기화 시 인증 상태 체크 로직을 여기에 추가할 수 있음
-    setIsLoading(false)
+    if (isLoading) {
+      return
+    }
 
     // 관리자 페이지 접근 제어
     if (adminPages.some((page) => pathname?.startsWith(page))) {
@@ -113,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
     }
-  }, [auth.isAuthenticated, auth.isAdmin, pathname, router])
+  }, [isLoading, auth.isAuthenticated, auth.isAdmin, pathname, router])
 
   // 로딩 표시
   if (isLoading) {
