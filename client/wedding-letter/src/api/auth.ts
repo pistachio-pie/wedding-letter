@@ -1,7 +1,7 @@
 // 인증 api 관련 함수
 // 추후 리프레시 토큰 관련 api 추가 필요
 
-import { AdminRequest, AdminResponse } from '@/types/api'
+import { AdminRequest, AdminResponse } from '@/types/api/auth'
 import { apiClient } from './index'
 
 export const authApi = {

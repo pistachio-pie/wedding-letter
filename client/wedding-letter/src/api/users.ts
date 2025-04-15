@@ -1,6 +1,7 @@
 // 사용자 관련 api 함수
 
-import { ArrayResponse, Profile } from '@/types/api'
+import { ArrayResponse } from '@/types/api/common'
+import { Profile } from '@/types/api/user'
 import { apiClient } from './index'
 
 export const usersApi = {

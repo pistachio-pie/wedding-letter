@@ -1,7 +1,7 @@
 // 사용자 정보 관련 슬라이스
 // user: 현재 로그인한 사용자 정보
 
-import { Profile } from '@/types/api'
+import { Profile } from '@/types/api/user'
 import { StateCreator } from 'zustand'
 import { StoreState } from '../useStore'
 

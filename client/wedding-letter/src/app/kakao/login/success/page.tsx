@@ -1,7 +1,6 @@
 'use client'
 
 import { usersApi } from '@/api/users'
-import { useAuthContext } from '@/components/providers/AuthProvider'
 import { useStore } from '@/store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'

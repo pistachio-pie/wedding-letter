@@ -1,8 +1,8 @@
 'use client'
 // 관리자 계정 생성 및 로그인, 로그아웃
 import { authApi } from '@/api/auth'
-import { useStore, useLogout } from '@/store'
-import { AdminRequest } from '@/types/api'
+import { useStore } from '@/store'
+import { AdminRequest } from '@/types/api/auth'
 import { useState } from 'react'
 
 export function useAuth() {

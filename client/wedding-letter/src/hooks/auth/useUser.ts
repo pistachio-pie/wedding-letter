@@ -1,7 +1,7 @@
 'use client'
 
 import { usersApi } from '@/api/users'
-import { Profile, User } from '@/types/api'
+import { Profile } from '@/types/api/user'
 import useSWR from 'swr'
 import { useStore } from '@/store'
 

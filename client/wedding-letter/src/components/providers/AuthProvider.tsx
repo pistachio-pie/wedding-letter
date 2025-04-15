@@ -2,7 +2,7 @@
 
 import { usersApi } from '@/api/users'
 import { useStore } from '@/store'
-import { Profile } from '@/types/api'
+import { Profile } from '@/types/api/user'
 import { usePathname, useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
