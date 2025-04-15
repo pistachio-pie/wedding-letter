@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check } from 'lucide-react'
 import CommonFormField from '@/components/common/form-field'
 import { useAuth } from '@/hooks/auth/useAuth'
+import { useAuthContext } from '@/components/providers/AuthProvider'
 
 const formSchema = z.object({
   email: z.string().email({ message: '이메일 형식으로 입력해주세요' }),
@@ -24,10 +25,24 @@ export default function Admin() {
     },
   })
 
-  const { loginAdmin } = useAuth()
+  const { loginAdmin, logout } = useAuth()
+  const auth = useAuthContext()
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     loginAdmin(values)
+  }
+
+  // 로그아웃 버튼 동작
+  const handleLogout = async () => {
+    await logout()
+  }
+
+  if (auth.isAdmin) {
+    return (
+      <div className='flex flex-col justify-center items-center h-1/2'>
+        관리자 페이지 : 로그인 됨<Button onClick={handleLogout}>로그아웃</Button>
+      </div>
+    )
   }
 
   return (
