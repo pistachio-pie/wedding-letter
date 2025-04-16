@@ -206,7 +206,7 @@ export class InvitationController {
     @ApiOperation({
         summary: '초대장 생성 (계좌정보, 갤러리 이미지 포함)',
         description:
-            '초대장을 생성합니다. userId는 토큰에서 자동으로 설정됩니다 (관리자는 다른 사용자 ID 설정 가능).',
+            '사용자당 하나의 초대장만 생성할 수 있습니다. 이미 초대장이 있는 경우 400 에러가 반환됩니다,userId는 토큰에서 자동으로 설정됩니다 (관리자는 다른 사용자 ID 설정 가능).',
     })
     @ApiResponse({
         status: 201,
@@ -219,6 +219,25 @@ export class InvitationController {
                         data: {
                             $ref: getSchemaPath(InvitationResponseCompleteDto),
                         },
+                    },
+                },
+            ],
+        },
+    })
+    @ApiResponse({
+        status: 400,
+        description: '이미 초대장이 있는 경우',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: false },
+                        message: {
+                            example:
+                                '사용자당 하나의 초대장만 생성할 수 있습니다.',
+                        },
+                        data: { example: null },
                     },
                 },
             ],
@@ -297,7 +316,7 @@ export class InvitationController {
 
     @Delete(':id')
     @UseGuards(AccessTokenGuard)
-    @ApiOperation({ summary: '초대장 삭제' })
+    @ApiOperation({ summary: '초대장 소프트 삭제 (데이터 보존)' })
     @ApiParam({ name: 'id', description: '초대장 ID' })
     @ApiResponse({
         status: 200,
@@ -338,6 +357,129 @@ export class InvitationController {
             success: true,
             message: '초대장이 성공적으로 삭제되었습니다.',
             data: null,
+            timestamp: Date.now(),
+        }
+    }
+
+    @Delete(':id/hard')
+    @UseGuards(AccessTokenGuard, RolesGuard)
+    @Roles('ADMIN')
+    @ApiOperation({
+        summary: '관리자 전용: 초대장 완전 삭제 (데이터 영구 제거)',
+    })
+    @ApiParam({ name: 'id', description: '초대장 ID' })
+    @ApiResponse({
+        status: 200,
+        description: '초대장 완전 삭제 완료',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: true },
+                        message: {
+                            example: '초대장이 영구적으로 삭제되었습니다.',
+                        },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
+    })
+    async hardRemove(@Param('id') id: string): Promise<any> {
+        await this.invitationService.hardRemove(+id)
+
+        return {
+            success: true,
+            message: '초대장이 영구적으로 삭제되었습니다.',
+            data: null,
+            timestamp: Date.now(),
+        }
+    }
+
+    @Put(':id/restore')
+    @UseGuards(AccessTokenGuard, RolesGuard)
+    @Roles('ADMIN')
+    @ApiOperation({ summary: '관리자 전용: 삭제된 초대장 복구' })
+    @ApiParam({ name: 'id', description: '초대장 ID' })
+    @ApiResponse({
+        status: 200,
+        description: '초대장 복구 완료',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            $ref: getSchemaPath(InvitationResponseCompleteDto),
+                        },
+                    },
+                },
+            ],
+        },
+    })
+    async restore(@Param('id') id: string): Promise<any> {
+        const restoredInvitation = await this.invitationService.restore(+id)
+
+        return {
+            success: true,
+            message: '초대장이 성공적으로 복구되었습니다.',
+            data: restoredInvitation,
+            timestamp: Date.now(),
+        }
+    }
+
+    @Get('deleted')
+    @UseGuards(AccessTokenGuard, RolesGuard)
+    @Roles('ADMIN')
+    @ApiOperation({
+        summary: '관리자 전용: 삭제된 초대장 목록 조회',
+    })
+    @ApiQuery({
+        name: 'page',
+        description: '페이지 번호',
+        required: false,
+        type: Number,
+    })
+    @ApiQuery({
+        name: 'limit',
+        description: '페이지당 항목 수',
+        required: false,
+        type: Number,
+    })
+    @ApiResponse({
+        status: 200,
+        description: '삭제된 초대장 목록 반환',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'array',
+                            items: {
+                                $ref: getSchemaPath(InvitationListResponseDto),
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+    })
+    async findAllDeleted(
+        @Query('page') page?: number,
+        @Query('limit') limit?: number,
+    ): Promise<any> {
+        const invitations =
+            await this.invitationService.findAllDeletedSimplified(
+                page ? +page : 1,
+                limit ? +limit : 10,
+            )
+
+        return {
+            success: true,
+            message: '삭제된 초대장 목록을 성공적으로 조회했습니다.',
+            data: invitations,
             timestamp: Date.now(),
         }
     }

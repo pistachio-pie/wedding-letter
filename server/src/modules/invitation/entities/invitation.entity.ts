@@ -7,6 +7,7 @@ import {
     JoinColumn,
     CreateDateColumn,
     UpdateDateColumn,
+    DeleteDateColumn,
 } from 'typeorm'
 
 @Entity()
@@ -71,4 +72,7 @@ export class Invitation {
 
     @UpdateDateColumn()
     updatedAt: Date
+
+    @DeleteDateColumn()
+    deletedAt: Date
 }

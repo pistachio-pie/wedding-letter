@@ -51,4 +51,12 @@ export class InvitationListResponseDto {
         example: '2023-01-01T00:00:00.000Z',
     })
     createdAt: Date
+
+    @ApiProperty({
+        description: '삭제 일시',
+        example: '2023-01-10T00:00:00.000Z',
+        required: false,
+        nullable: true,
+    })
+    deletedAt?: Date
 }

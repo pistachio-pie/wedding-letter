@@ -6,6 +6,7 @@ import {
     JoinColumn,
     CreateDateColumn,
     UpdateDateColumn,
+    DeleteDateColumn,
 } from 'typeorm'
 import { Invitation } from '../../invitation/entities/invitation.entity'
 
@@ -38,4 +39,7 @@ export class Account {
 
     @UpdateDateColumn()
     updatedAt: Date
+
+    @DeleteDateColumn()
+    deletedAt: Date
 }
