@@ -1,15 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator'
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator'
 
 export class CreateInvitationDto {
-    @ApiProperty({
-        description: '사용자 ID',
-        example: 1,
-    })
-    @IsNumber()
-    @IsNotEmpty()
-    userId: number
-
     @ApiProperty({
         description: '신랑 이름',
         example: '김철수',

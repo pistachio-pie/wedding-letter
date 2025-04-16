@@ -19,6 +19,8 @@ import {
     ApiParam,
     ApiQuery,
     ApiConsumes,
+    ApiExtraModels,
+    getSchemaPath,
 } from '@nestjs/swagger'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { GalleryService } from './gallery.service'
@@ -26,9 +28,11 @@ import { CreateGalleryDto } from './dto/create-gallery.dto'
 import { UpdateGalleryDto } from './dto/update-gallery.dto'
 import { GalleryResponseDto } from './dto/gallery-response.dto'
 import { Multer } from 'multer'
+import { ApiResponseDto } from 'src/types/api-response.dto'
 
 @ApiTags('gallery')
 @Controller('gallery')
+@ApiExtraModels(ApiResponseDto, GalleryResponseDto)
 export class GalleryController {
     constructor(private readonly galleryService: GalleryService) {}
 
@@ -43,7 +47,19 @@ export class GalleryController {
     @ApiResponse({
         status: 200,
         description: '갤러리 이미지 목록 반환',
-        type: [GalleryResponseDto],
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'array',
+                            items: { $ref: getSchemaPath(GalleryResponseDto) },
+                        },
+                    },
+                },
+            ],
+        },
     })
     async findAll(
         @Query('invitationId') invitationId?: string,
@@ -60,7 +76,19 @@ export class GalleryController {
     @ApiResponse({
         status: 200,
         description: '초대장별 갤러리 이미지 목록 반환',
-        type: [GalleryResponseDto],
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'array',
+                            items: { $ref: getSchemaPath(GalleryResponseDto) },
+                        },
+                    },
+                },
+            ],
+        },
     })
     findByInvitationId(
         @Param('invitationId') invitationId: string,
@@ -74,7 +102,16 @@ export class GalleryController {
     @ApiResponse({
         status: 200,
         description: '갤러리 이미지 정보 반환',
-        type: GalleryResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(GalleryResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     findOne(@Param('id') id: string): Promise<GalleryResponseDto> {
         return this.galleryService.findOne(+id)
@@ -85,7 +122,16 @@ export class GalleryController {
     @ApiResponse({
         status: 201,
         description: '갤러리 이미지 생성 완료',
-        type: GalleryResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(GalleryResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     create(
         @Body() createGalleryDto: CreateGalleryDto,
@@ -101,18 +147,14 @@ export class GalleryController {
         status: 201,
         description: '갤러리 이미지 업로드 완료',
         schema: {
-            example: {
-                id: 1,
-                invitationId: 5,
-                image_url:
-                    'https://wedding-letter01.s3.ap-southeast-2.amazonaws.com/images/1234567890-gallery.jpg',
-                description: '웨딩 촬영 사진',
-                category: '본식',
-                location: '그랜드 힐튼 서울',
-                photoDate: '2023-06-10',
-                createdAt: '2023-06-15T09:12:34.567Z',
-                updatedAt: '2023-06-15T09:12:34.567Z',
-            },
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(GalleryResponseDto) },
+                    },
+                },
+            ],
         },
     })
     @UseInterceptors(FileInterceptor('file'))
@@ -170,7 +212,16 @@ export class GalleryController {
     @ApiResponse({
         status: 200,
         description: '갤러리 이미지 업데이트 완료',
-        type: GalleryResponseDto,
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: { $ref: getSchemaPath(GalleryResponseDto) },
+                    },
+                },
+            ],
+        },
     })
     update(
         @Param('id') id: string,
@@ -185,6 +236,21 @@ export class GalleryController {
     @ApiResponse({
         status: 200,
         description: '갤러리 이미지 삭제 완료',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: true },
+                        message: {
+                            example:
+                                '갤러리 이미지가 성공적으로 삭제되었습니다.',
+                        },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
     })
     remove(@Param('id') id: string): Promise<void> {
         return this.galleryService.remove(+id)

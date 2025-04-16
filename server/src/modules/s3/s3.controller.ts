@@ -17,12 +17,16 @@ import {
     ApiConsumes,
     ApiOperation,
     ApiResponse,
+    ApiExtraModels,
+    getSchemaPath,
 } from '@nestjs/swagger'
 import { Multer } from 'multer'
 import { v4 as uuidv4 } from 'uuid'
+import { ApiResponseDto } from 'src/types/api-response.dto'
 
 @ApiTags('S3')
 @Controller('s3')
+@ApiExtraModels(ApiResponseDto)
 export class S3Controller {
     constructor(private readonly s3Service: S3Service) {}
 
@@ -33,24 +37,29 @@ export class S3Controller {
         status: 201,
         description: '파일 업로드 성공',
         schema: {
-            type: 'object',
-            properties: {
-                url: {
-                    type: 'string',
-                    example:
-                        'https://wedding-letter01.s3.ap-southeast-2.amazonaws.com/images/1234567890-gallery.jpg',
-                    description: '업로드된 파일의 URL',
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                    example:
+                                        'https://wedding-letter01.s3.ap-southeast-2.amazonaws.com/images/1234567890-gallery.jpg',
+                                    description: '업로드된 파일의 URL',
+                                },
+                                key: {
+                                    type: 'string',
+                                    example: 'images/1234567890-gallery.jpg',
+                                    description: 'S3에 저장된 파일의 키',
+                                },
+                            },
+                        },
+                    },
                 },
-                key: {
-                    type: 'string',
-                    example: 'images/1234567890-gallery.jpg',
-                    description: 'S3에 저장된 파일의 키',
-                },
-                message: {
-                    type: 'string',
-                    example: '파일 업로드 성공',
-                },
-            },
+            ],
         },
     })
     @UseInterceptors(FileInterceptor('file'))
@@ -117,20 +126,25 @@ export class S3Controller {
         status: 201,
         description: '초대장 이미지 업로드 성공',
         schema: {
-            type: 'object',
-            properties: {
-                url: {
-                    type: 'string',
-                    example:
-                        'https://wedding-letter01.s3.ap-southeast-2.amazonaws.com/invitations/1234567890-wedding.jpg',
-                    description:
-                        '업로드된 이미지의 URL (초대장 생성 시 image_url로 사용)',
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                    example:
+                                        'https://wedding-letter01.s3.ap-southeast-2.amazonaws.com/invitations/1234567890-wedding.jpg',
+                                    description:
+                                        '업로드된 이미지의 URL (초대장 생성 시 image_url로 사용)',
+                                },
+                            },
+                        },
+                    },
                 },
-                message: {
-                    type: 'string',
-                    example: '초대장 이미지 업로드 성공',
-                },
-            },
+            ],
         },
     })
     @UseInterceptors(FileInterceptor('file'))
@@ -183,7 +197,33 @@ export class S3Controller {
 
     @Get('presigned-url/:fileName')
     @ApiOperation({ summary: '프리사인된 URL 생성' })
-    @ApiResponse({ status: 200, description: '프리사인된 URL 생성 성공' })
+    @ApiResponse({
+        status: 200,
+        description: '프리사인된 URL 생성 성공',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        data: {
+                            type: 'object',
+                            properties: {
+                                presignedUrl: {
+                                    type: 'string',
+                                    example:
+                                        'https://wedding-letter01.s3.ap-southeast-2.amazonaws.com/images/sample.jpg?X-Amz-Algorithm=...',
+                                },
+                                key: {
+                                    type: 'string',
+                                    example: 'images/sample.jpg',
+                                },
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+    })
     async generatePresignedUrl(
         @Param('fileName') fileName: string,
         @Body('folder') folder: string = 'images',
@@ -207,7 +247,22 @@ export class S3Controller {
 
     @Delete('delete/:key')
     @ApiOperation({ summary: '파일 삭제' })
-    @ApiResponse({ status: 200, description: '파일 삭제 성공' })
+    @ApiResponse({
+        status: 200,
+        description: '파일 삭제 성공',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: true },
+                        message: { example: '파일 삭제 성공' },
+                        data: { example: null },
+                    },
+                },
+            ],
+        },
+    })
     async deleteFile(@Param('key') key: string) {
         try {
             await this.s3Service.deleteFile(key)

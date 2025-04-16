@@ -55,13 +55,6 @@ export class User {
     refreshToken: string
 
     @ApiProperty({
-        example: false,
-        description: '관리자 여부',
-    })
-    @Column({ default: false })
-    isAdmin: boolean
-
-    @ApiProperty({
         example: 'USER',
         description: '사용자 역할 (USER, ADMIN)',
         enum: ['USER', 'ADMIN'],
