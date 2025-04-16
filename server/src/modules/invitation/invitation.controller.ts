@@ -206,7 +206,7 @@ export class InvitationController {
     @ApiOperation({
         summary: '초대장 생성 (계좌정보, 갤러리 이미지 포함)',
         description:
-            '사용자당 하나의 초대장만 생성할 수 있습니다. 이미 초대장이 있는 경우 400 에러가 반환됩니다,userId는 토큰에서 자동으로 설정됩니다 (관리자는 다른 사용자 ID 설정 가능).',
+            '사용자당 하나의 초대장만 생성할 수 있습니다. 이미 초대장이 있는 경우 400 에러가 반환됩니다, userId는 토큰에서 자동으로 설정됩니다.',
     })
     @ApiResponse({
         status: 201,
