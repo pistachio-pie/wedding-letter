@@ -24,7 +24,7 @@ export class InvitationService {
     // URL 생성을 위한 헬퍼 메서드
     private generateUniqueInvitationUrl(): string {
         const uniqueId = uuidv4().slice(0, 8)
-        return `invitation/${uniqueId}`
+        return `letter/${uniqueId}`
     }
 
     /**
