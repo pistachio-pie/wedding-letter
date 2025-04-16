@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+    Injectable,
+    NotFoundException,
+    HttpException,
+    HttpStatus,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
 import { Invitation } from './entities/invitation.entity'
@@ -147,6 +152,38 @@ export class InvitationService {
         createInvitationCompleteDto: CreateInvitationCompleteDto,
     ): Promise<InvitationResponseCompleteDto> {
         try {
+            // 사용자가 이미 초대장을 생성했는지 확인
+            const userId = createInvitationCompleteDto.invitation.userId
+            const existingInvitations = await this.invitationRepository.find({
+                where: { userId },
+                withDeleted: false, // 소프트 삭제된 항목은 제외
+            })
+
+            if (existingInvitations.length > 0) {
+                throw new HttpException(
+                    '사용자당 하나의 초대장만 생성할 수 있습니다.',
+                    HttpStatus.BAD_REQUEST,
+                )
+            }
+
+            // 소프트 삭제된 초대장이 있는지 확인
+            const deletedInvitations = await this.invitationRepository.find({
+                where: { userId },
+                withDeleted: true,
+            })
+
+            // 소프트 삭제된 초대장만 필터링
+            const onlyDeletedInvitations = deletedInvitations.filter(
+                (inv) => inv.deletedAt !== null,
+            )
+
+            // 소프트 삭제된 초대장이 있으면 완전히 삭제
+            if (onlyDeletedInvitations.length > 0) {
+                for (const inv of onlyDeletedInvitations) {
+                    await this.hardRemove(inv.id)
+                }
+            }
+
             // 1. 먼저 초대장 생성 (URL 자동 생성)
             const invitationData = {
                 ...createInvitationCompleteDto.invitation,

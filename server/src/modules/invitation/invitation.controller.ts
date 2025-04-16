@@ -203,7 +203,11 @@ export class InvitationController {
 
     @Post()
     @UseGuards(AccessTokenGuard)
-    @ApiOperation({ summary: '초대장 생성 (계좌정보, 갤러리 이미지 포함)' })
+    @ApiOperation({
+        summary: '초대장 생성 (계좌정보, 갤러리 이미지 포함)',
+        description:
+            '사용자당 하나의 초대장만 생성할 수 있습니다. 이미 초대장이 있는 경우 400 에러가 반환됩니다.',
+    })
     @ApiResponse({
         status: 201,
         description: '초대장 생성 완료',
@@ -215,6 +219,25 @@ export class InvitationController {
                         data: {
                             $ref: getSchemaPath(InvitationResponseCompleteDto),
                         },
+                    },
+                },
+            ],
+        },
+    })
+    @ApiResponse({
+        status: 400,
+        description: '이미 초대장이 있는 경우',
+        schema: {
+            allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                    properties: {
+                        success: { example: false },
+                        message: {
+                            example:
+                                '사용자당 하나의 초대장만 생성할 수 있습니다.',
+                        },
+                        data: { example: null },
                     },
                 },
             ],
