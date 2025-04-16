@@ -9,7 +9,7 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { auth, user } = useStore()
+  const { auth } = useStore()
 
   // 관리자 계정 생성
   const registAdmin = async (requestData: AdminRequest) => {

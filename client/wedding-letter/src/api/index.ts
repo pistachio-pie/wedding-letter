@@ -18,7 +18,7 @@ api.interceptors.response.use(
 
 // 커스텀 메서드 정의
 export const apiClient = {
-  get: <T>(url: string): Promise<T> => api.get<T>(url) as unknown as Promise<T>,
+  get: <T>(url: string, params?: any): Promise<T> => api.get<T>(url, { params }) as unknown as Promise<T>,
   post: <T>(url: string, data?: any): Promise<T> => api.post<T>(url, data) as unknown as Promise<T>,
   put: <T>(url: string, data?: any): Promise<T> => api.put<T>(url, data) as unknown as Promise<T>,
   delete: <T>(url: string): Promise<T> => api.delete<T>(url) as unknown as Promise<T>,
