@@ -153,7 +153,8 @@ export class InvitationService {
     ): Promise<InvitationResponseCompleteDto> {
         try {
             // 사용자가 이미 초대장을 생성했는지 확인
-            const userId = createInvitationCompleteDto.invitation.userId
+            const userId = (createInvitationCompleteDto.invitation as any)
+                .userId
             const existingInvitations = await this.invitationRepository.find({
                 where: { userId },
                 withDeleted: false, // 소프트 삭제된 항목은 제외
