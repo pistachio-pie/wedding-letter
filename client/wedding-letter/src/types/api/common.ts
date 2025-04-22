@@ -4,22 +4,19 @@ export enum Role {
   GUEST = 'GUEST',
 }
 
-// 배열 데이터 응답 제네릭 타입
-// GET: api/users 응답 타입
-// GET: api/users/admin/all 응답 타입
-export type ArrayResponse<T> = T[]
-
 // 공통 기본 응답 인터페이스
-export interface BaseResponse {
+export interface SingleResponse<T> {
+  data: T
   success: boolean
   message: string
+  timestamp: number
 }
 
-// axios 통신 응답 타입
-export interface ApiResponse<T> {
-  data: T
-  message?: string
+export interface ListResponse<T> {
+  data: T[]
   success: boolean
+  message: string
+  timestamp: number
 }
 
 // api 에러 타입
@@ -27,4 +24,11 @@ export interface ApiError {
   message: string
   success: boolean
   statusCode?: number
+}
+
+// 조회 요청 parameter 타입
+export interface Params {
+  userId?: number
+  page?: number
+  limit?: number
 }
