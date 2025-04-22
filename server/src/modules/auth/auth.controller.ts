@@ -327,15 +327,7 @@ export class AuthController {
             return res.status(HttpStatus.OK).json({
                 success: true,
                 message: '로그인 성공',
-                data: {
-                    user: {
-                        id: result.user.id,
-                        name: result.user.name,
-                        email: result.user.email,
-                        role: result.user.role,
-                    },
-                    accessToken: result.accessToken,
-                },
+                data: null,
                 timestamp: Date.now(),
             })
         } catch (error) {
