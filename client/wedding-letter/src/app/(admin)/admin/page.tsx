@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check } from 'lucide-react'
 import CommonFormField from '@/components/common/form-field'
-import { useAuth } from '@/hooks/auth/useAuth'
 import { useAuthContext } from '@/components/providers/AuthProvider'
+import { useAdmin } from '@/hooks/auth/useAdmin'
 
 const formSchema = z.object({
   email: z.string().email({ message: '이메일 형식으로 입력해주세요' }),
@@ -25,7 +25,7 @@ export default function Admin() {
     },
   })
 
-  const { loginAdmin, logout } = useAuth()
+  const { loginAdmin, logout } = useAdmin()
   const auth = useAuthContext()
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {

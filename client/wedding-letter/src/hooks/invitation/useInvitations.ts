@@ -1,3 +1,5 @@
+'use client'
+
 import { invitationApi } from '@/api/invitation'
 import { Params } from '@/types/api/common'
 import useSWR from 'swr'

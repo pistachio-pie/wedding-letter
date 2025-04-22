@@ -1,3 +1,5 @@
+'use client'
+
 import { invitationApi } from '@/api/invitation'
 import { InvitationDetailRequest } from '@/types/api/invitation'
 import { useState } from 'react'

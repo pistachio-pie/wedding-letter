@@ -65,12 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             auth.setAuthenticated(true)
 
             // 관리자 권한 확인
-            if (userProfile.isAdmin) {
+            if (userProfile.data.role === 'ADMIN') {
               auth.setAdmin(true)
             }
 
             // 사용자 정보 저장
-            user.setUser(userProfile)
+            user.setUser(userProfile.data)
           }
         } catch (error) {
           console.log('인증 확인 중 오류 또는 인증되지 않음')

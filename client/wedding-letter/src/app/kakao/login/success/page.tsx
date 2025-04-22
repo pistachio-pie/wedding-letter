@@ -33,11 +33,11 @@ export default function Success() {
           // 스토어 업데이트
           auth.setAuthenticated(true)
 
-          if (userProfile.isAdmin) {
+          if (userProfile.data.role === 'ADMIN') {
             auth.setAdmin(true)
           }
 
-          user.setUser(userProfile)
+          user.setUser(userProfile.data)
 
           console.log('로그인 성공')
           router.push('/')
