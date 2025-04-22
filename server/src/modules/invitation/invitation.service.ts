@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+    Injectable,
+    NotFoundException,
+    HttpException,
+    HttpStatus,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
 import { Invitation } from './entities/invitation.entity'
@@ -9,6 +14,7 @@ import { UpdateInvitationCompleteDto } from './dto/update-invitation-complete.dt
 import { InvitationResponseCompleteDto } from './dto/invitation-response-complete.dto'
 import { InvitationListResponseDto } from './dto/invitation-list-response.dto'
 import { v4 as uuidv4 } from 'uuid'
+import { Not, IsNull } from 'typeorm'
 
 @Injectable()
 export class InvitationService {
@@ -23,7 +29,7 @@ export class InvitationService {
     // URL 생성을 위한 헬퍼 메서드
     private generateUniqueInvitationUrl(): string {
         const uniqueId = uuidv4().slice(0, 8)
-        return `invitation/${uniqueId}`
+        return `letter/${uniqueId}`
     }
 
     /**
@@ -48,6 +54,7 @@ export class InvitationService {
                 'invitation_url',
                 'createdAt',
             ],
+            withDeleted: false, // 소프트 삭제된 항목 제외
         }
 
         // userId가 제공된 경우 where 조건 추가
@@ -96,6 +103,7 @@ export class InvitationService {
                 'invitation_url',
                 'createdAt',
             ],
+            withDeleted: false, // 소프트 삭제된 항목 제외
         })
 
         // 엔티티를 DTO로 변환
@@ -117,6 +125,7 @@ export class InvitationService {
         // 1. 초대장 조회
         const invitation = await this.invitationRepository.findOne({
             where: { id },
+            withDeleted: false, // 소프트 삭제된 항목 제외
         })
 
         if (!invitation) {
@@ -143,6 +152,39 @@ export class InvitationService {
         createInvitationCompleteDto: CreateInvitationCompleteDto,
     ): Promise<InvitationResponseCompleteDto> {
         try {
+            // 사용자가 이미 초대장을 생성했는지 확인
+            const userId = (createInvitationCompleteDto.invitation as any)
+                .userId
+            const existingInvitations = await this.invitationRepository.find({
+                where: { userId },
+                withDeleted: false, // 소프트 삭제된 항목은 제외
+            })
+
+            if (existingInvitations.length > 0) {
+                throw new HttpException(
+                    '사용자당 하나의 초대장만 생성할 수 있습니다.',
+                    HttpStatus.BAD_REQUEST,
+                )
+            }
+
+            // 소프트 삭제된 초대장이 있는지 확인
+            const deletedInvitations = await this.invitationRepository.find({
+                where: { userId },
+                withDeleted: true,
+            })
+
+            // 소프트 삭제된 초대장만 필터링
+            const onlyDeletedInvitations = deletedInvitations.filter(
+                (inv) => inv.deletedAt !== null,
+            )
+
+            // 소프트 삭제된 초대장이 있으면 완전히 삭제
+            if (onlyDeletedInvitations.length > 0) {
+                for (const inv of onlyDeletedInvitations) {
+                    await this.hardRemove(inv.id)
+                }
+            }
+
             // 1. 먼저 초대장 생성 (URL 자동 생성)
             const invitationData = {
                 ...createInvitationCompleteDto.invitation,
@@ -236,7 +278,7 @@ export class InvitationService {
                 updateInvitationCompleteDto.accounts &&
                 updateInvitationCompleteDto.accounts.length > 0
             ) {
-                // 기존 계좌 삭제
+                // 기존 계좌 소프트 삭제
                 await this.accountService.removeByInvitationId(id)
 
                 // 새 계좌 순차적으로 추가
@@ -254,7 +296,7 @@ export class InvitationService {
                 updateInvitationCompleteDto.galleryImages &&
                 updateInvitationCompleteDto.galleryImages.length > 0
             ) {
-                // 기존 이미지 삭제
+                // 기존 이미지 소프트 삭제
                 await this.galleryService.removeByInvitationId(id)
 
                 // 새 이미지 순차적으로 추가
@@ -277,6 +319,7 @@ export class InvitationService {
     async remove(id: number): Promise<void> {
         const invitation = await this.invitationRepository.findOne({
             where: { id },
+            withDeleted: false, // 소프트 삭제된 항목만 조회
         })
 
         if (!invitation) {
@@ -285,11 +328,104 @@ export class InvitationService {
             )
         }
 
-        // 연결된 계좌 정보 및 갤러리 이미지도 함께 삭제
+        // 연관된 계좌 정보 및 갤러리 이미지도 소프트 삭제
         await this.accountService.removeByInvitationId(id)
         await this.galleryService.removeByInvitationId(id)
 
-        // 초대장 삭제
+        // 초대장 소프트 삭제
+        await this.invitationRepository.softDelete(id)
+    }
+
+    // 완전 삭제 기능 추가 (관리자용)
+    async hardRemove(id: number): Promise<void> {
+        const invitation = await this.invitationRepository.findOne({
+            where: { id },
+            withDeleted: true, // 소프트 삭제된 항목도 포함하여 조회
+        })
+
+        if (!invitation) {
+            throw new NotFoundException(
+                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
+            )
+        }
+
+        // 연결된 계좌 정보 및 갤러리 이미지도 완전 삭제
+        await this.accountService.hardRemoveByInvitationId(id)
+        await this.galleryService.hardRemoveByInvitationId(id)
+
+        // 초대장 완전 삭제
         await this.invitationRepository.delete(id)
+    }
+
+    // 삭제된 초대장 복구 기능 (관리자용)
+    async restore(id: number): Promise<InvitationResponseCompleteDto> {
+        const invitation = await this.invitationRepository.findOne({
+            where: { id },
+            withDeleted: true, // 소프트 삭제된 항목도 포함하여 조회
+        })
+
+        if (!invitation) {
+            throw new NotFoundException(
+                `ID가 ${id}인 초대장을 찾을 수 없습니다.`,
+            )
+        }
+
+        // 초대장 복구
+        await this.invitationRepository.restore(id)
+
+        // 연관된 계좌 정보 및 갤러리 이미지도 복구
+        await this.accountService.restoreByInvitationId(id)
+        await this.galleryService.restoreByInvitationId(id)
+
+        // 복구된 초대장 정보 반환
+        return this.findOneComplete(id)
+    }
+
+    /**
+     * 간소화된 삭제된 초대장 목록 조회 (관리자용)
+     */
+    async findAllDeletedSimplified(
+        page: number = 1,
+        limit: number = 10,
+    ): Promise<InvitationListResponseDto[]> {
+        // 쿼리 조건 설정
+        const queryOptions: any = {
+            skip: (page - 1) * limit,
+            take: limit,
+            select: [
+                'id',
+                'userId',
+                'groom_name',
+                'bride_name',
+                'wedding_date',
+                'venue_name',
+                'invitation_url',
+                'createdAt',
+                'deletedAt',
+            ],
+            withDeleted: true,
+            // 삭제된 항목만 조회
+            where: {
+                deletedAt: Not(IsNull()),
+            },
+        }
+
+        // 페이징 적용된 쿼리로 초대장 조회
+        const invitations = await this.invitationRepository.find(queryOptions)
+
+        // 엔티티를 DTO로 변환
+        return invitations.map((invitation) => {
+            const dto = new InvitationListResponseDto()
+            dto.id = invitation.id
+            dto.userId = invitation.userId
+            dto.groom_name = invitation.groom_name
+            dto.bride_name = invitation.bride_name
+            dto.wedding_date = invitation.wedding_date
+            dto.venue_name = invitation.venue_name
+            dto.invitation_url = invitation.invitation_url
+            dto.createdAt = invitation.createdAt
+            dto.deletedAt = invitation.deletedAt
+            return dto
+        })
     }
 }
