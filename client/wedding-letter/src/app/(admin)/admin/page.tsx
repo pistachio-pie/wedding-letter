@@ -10,6 +10,7 @@ import { Check } from 'lucide-react'
 import CommonFormField from '@/components/common/form-field'
 import { useAuthContext } from '@/components/providers/AuthProvider'
 import { useAdmin } from '@/hooks/auth/useAdmin'
+import { useEffect } from 'react'
 
 const formSchema = z.object({
   email: z.string().email({ message: '이메일 형식으로 입력해주세요' }),
@@ -29,6 +30,7 @@ export default function Admin() {
   const auth = useAuthContext()
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log(values)
     loginAdmin(values)
   }
 

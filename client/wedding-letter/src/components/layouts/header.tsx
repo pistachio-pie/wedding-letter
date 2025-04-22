@@ -11,13 +11,14 @@ import {
   NavigationMenuList,
 } from '@/components/ui/navigation-menu'
 import { useAuth } from '@/hooks/auth/useAuth'
+import useStore from '@/store/useStore'
 
 export default function Header() {
   const router = useRouter()
   const pathname = usePathname()
 
-  const { isAuthenticated, logout } = useAuth()
-
+  const { kakaoLogout } = useAuth()
+  const { auth } = useStore()
   // admin 페이지 여부 확인
   const isAdminPage = pathname?.startsWith('/admin')
 
@@ -26,7 +27,7 @@ export default function Header() {
 
   // 로그아웃 버튼 동작
   const handleLogout = async () => {
-    await logout()
+    await kakaoLogout()
     router.push('/login')
   }
 
@@ -57,7 +58,7 @@ export default function Header() {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-        {isAuthenticated ? (
+        {auth.isAuthenticated ? (
           <Button onClick={handleLogout}>로그아웃</Button>
         ) : (
           <Button onClick={() => router.push('/login')}>로그인</Button>
