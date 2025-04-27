@@ -1,17 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsOptional, IsString } from 'class-validator'
 
 export class CreateGalleryDto {
-    @ApiProperty({
-        description:
-            '초대장 ID (초대장 생성 시에는 필요 없음, 서버에서 자동 설정)',
-        example: 1,
-        required: false,
-    })
-    @IsOptional()
-    @IsNumber()
-    invitationId?: number
-
     @ApiProperty({
         description: '이미지 URL',
         example: 'https://example.com/images/wedding1.jpg',
