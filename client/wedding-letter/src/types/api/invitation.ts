@@ -78,7 +78,6 @@ export interface InvitationRequest {
   transportation_info: string
   invitation_url: string
   invitation_message: string
-  id?: number
 }
 
 export interface AccountRequest {
